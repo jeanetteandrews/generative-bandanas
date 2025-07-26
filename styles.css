@@ -1,0 +1,132 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: white;
+}
+
+
+#sketch-holder {
+  position: relative; /* Required for absolute overlay */
+  display: grid;
+  grid-template-columns: repeat(14, 50px);
+  grid-template-rows: repeat(14, 50px);
+  width: fit-content;
+  outline: 2px solid black;
+  background-color: white;
+}
+
+#overlay-grid {
+  /* position: absolute; */
+  /* top: 150px; 
+  left: 150px; */
+  display: grid;
+  grid-template-columns: repeat(8, 50px);
+  grid-template-rows: repeat(8, 50px);
+  /* pointer-events: none;  */
+}
+
+#overlay-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  transform-origin: center;
+  display: grid;
+  grid-template-columns: repeat(8, 50px);
+  grid-template-rows: repeat(8, 50px);
+  pointer-events: none; /* optional if you don’t want interactions */
+  z-index: 10;
+}
+
+
+#overlay-grid .overlay-cell {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* transform: rotate(-45deg);  */
+  background-color: white;
+  /* border: 1px solid #ccc; */
+}
+
+.grid-cell, .overlay-cell {
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+}
+
+#controls {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+#controls button {
+  padding: 5px 10px;
+  border: 1px solid #000;
+  background-color: white;
+  color: black;
+  cursor: pointer;
+}
+
+#controls button.active {
+  background-color: black;
+  color: white;
+}
+
+.control-button {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+  padding: 8px 12px;
+  margin: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.control-button:hover,
+.control-button.active {
+  background-color: black;
+  color: white;
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+#intro-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+#intro-screen .button-group button {
+  padding: 10px;
+  margin: 5px;
+  border: 1px solid black;
+  background-color: white;
+  cursor: pointer;
+}
+
+#intro-screen .button-group button.selected {
+  background-color: black;
+  color: white;
+}

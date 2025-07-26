@@ -4,228 +4,34 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Symptom Pattern Generator</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
-  <style>
-    body {
-      margin: 0;
-      display: flex;
-      height: 100vh;
-      font-family: sans-serif;
-      font-size: 16px;
-    }
-    #controls {
-      width: 300px;
-      padding: 20px;
-      overflow-y: auto;
-      border-left: 1px solid #ccc;
-    }
-    #controls label {
-      display: block;
-      margin-top: 20px;
-    }
-    canvas {
-      display: block;
-    }
-  </style>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js"></script>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="sketch-holder" style="flex: 1;"></div>
-  <div id="controls"></div>
+    <div id="intro-screen">
+  <h1>SELECT SYMPTOMS</h1>
+  <div id="symptom-selection" class="button-group"></div>
+  <button id="next-button" class="control-button">Next</button>
+</div>
+<div id="main-interface">
+    <div id="sketch-holder">
+  <!-- grid will be appended here -->
+  <div id="overlay-wrapper">
+    <div id="overlay-grid"></div>
+  </div>
+</div>
 
-  <script>
-    const symptoms = [
-      "angryoutbursts", "avoidance", "emotionalnumbing", "exaggeratedstartleresponse",
-      "excessivealertness", "feelingdetached", "flashbacks", "intrusivethoughts",
-      "lossofinterest", "nightmares", "problemswithconcentration", "selfblame",
-      "sleepdisturbance"
-    ];
-
-    const displayNames = {
-  angryoutbursts: "Angry Outbursts",
-  avoidance: "Avoidance",
-  emotionalnumbing: "Emotional Numbing",
-  exaggeratedstartleresponse: "Exaggerated Startle Response",
-  excessivealertness: "Excessive Alertness",
-  feelingdetached: "Feeling Detached",
-  flashbacks: "Flashbacks",
-  intrusivethoughts: "Intrusive Thoughts",
-  lossofinterest: "Loss of Interest",
-  nightmares: "Nightmares",
-  problemswithconcentration: "Problems With Concentration",
-  selfblame: "Self Blame",
-  sleepdisturbance: "Sleep Disturbance"
-};
+  <div id="controls" class="button-group"></div>
+  <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
+    <label id="slider-label" for="variant-slider">Selected: None</label>
+    <input id="variant-slider" type="range" min="1" max="7" value="1">
+  </div>
+  <button id="download-btn" class="control-button">Download Pattern</button>
+</div>
 
 
-    let sliders = {};
-    let icons = {}; // Loaded images
-
-    function preload() {
-      for (let symptom of symptoms) {
-        icons[symptom] = [];
-        for (let i = 1; i <= 7; i++) {
-          icons[symptom][i] = loadImage(`symptoms/${symptom}${i}.png`);
-        }
-      }
-    }
-
-    function setup() {
-      const canvas = createCanvas(600, 600);
-      canvas.parent("sketch-holder");
-      noLoop();
-      pixelDensity(1);
-
-      const controlDiv = document.getElementById("controls");
-      for (let symptom of symptoms) {
-        const label = document.createElement("label");
-        label.innerText = displayNames[symptom] || symptom;
-
-        const slider = document.createElement("input");
-        slider.type = "range";
-        slider.min = 0;
-        slider.max = 7;
-        slider.value = 4;
-        slider.addEventListener("input", redraw);
-
-        sliders[symptom] = slider;
-
-        controlDiv.appendChild(label);
-        controlDiv.appendChild(slider);
-      }
-    }
-
-    function draw() {
-      background(255);
-      let gridSize = 7;
-      let tileSize = width / (gridSize * 2);
-      let center = Math.floor(gridSize / 2);
-
-      // First: draw the full unrotated grid
-      for (let i = 0; i < gridSize; i++) {
-        for (let j = 0; j < gridSize; j++) {
-          let x = i * tileSize;
-          let y = j * tileSize;
-
-          if ((i == 3 && j == 3) || (i == 3 && j == 4) || (i == 4 && j == 3) ) {
-            symptom = symptoms[5];
-         } else if ((i == 2 && j == 3) || (i == 2 && j == 3) || (i == 2 && j == 4) || (i == 3 && j == 2) || (i == 4 && j == 2)) {
-            symptom = symptoms[6];
-          } else if ((i == 0 && j == 0) || (i == 1 && j == 1) || (i == 2 && j == 2)) {
-            symptom = symptoms[7];
-          } else if ((i == 5 && j == 2) || (i == 5 && j == 1) || (i == 5 && j == 0)) {
-            symptom = symptoms[8];
-          } else if ((i == 2 && j == 5) || (i == 1 && j == 5) || (i == 0 && j == 5)) {
-            symptom = symptoms[9];
-        } else if ((i == 0 && j == 1) || (i == 0 && j == 2) || (i == 0 && j == 3) || (i == 0 && j == 4) || (i == 0 && j == 5) || (i == 1 && j == 0) || (i == 2 && j == 0) || (i == 3 && j == 0) || (i == 4 && j == 0) || (i == 5 && j == 0)){
-            symptom = symptoms[10];
-          } else if ((i == 6 && j == 1) || (i == 1 && j == 6) || (i == 0 && j == 6) || (i == 6 && j == 0) ){
-            symptom = symptoms[11];
-          }else if ((i == 2 && j == 1) || (i == 3 && j == 1) || (i == 4 && j == 1) || (i == 1 && j == 2) || (i == 1 && j == 3) || (i == 1 && j == 4)){
-            symptom = symptoms[12];
-          }
-          else {
-            continue;
-          }
-          const val = parseInt(sliders[symptom].value);
-          if (val === 0) continue;
-          const img = icons[symptom][val];
-
-          drawMirroredSymmetry(img, x, y, tileSize);
-        }
-      }
-
-      // Draw white square under rotated region in all 4 quadrants
-
-        push();
-        translate(0, 0);
-        // translate(-0, -0);
-        translate(width / 2, height / 2);
-        rotate(PI / 4);
-        translate(-width / 2, -height / 2);
-        noStroke();
-        fill(255);
-        rect(tileSize * 3, tileSize * 3, tileSize * 8, tileSize * 8);
-        pop();
-
-      // Now draw the rotated tiles
-
-      for (let i = 0; i < gridSize; i++) {
-        for (let j = 0; j < gridSize; j++) {
-          let x = i * tileSize;
-          let y = j * tileSize;
-
-          let symptom;
-          let rotated = false;
-
-          if (i == 6 && j == 6) {
-            symptom = symptoms[0];
-            rotated = true;
-          } else if (i == 4 && j == 4) {
-            symptom = symptoms[1];
-            rotated = true;
-          } else if ((i == 5 && j == 6) || (i == 5 && j == 5) || (i == 6 && j == 5)) {
-            symptom = symptoms[2];
-            rotated = true;
-          }
-          else if ((i == 4 && j == 5) || (i == 5 && j == 4) || (i == 4 && j == 4) || (i == 4 && j == 6) || (i == 6 && j == 4)) {
-            symptom = symptoms[3];
-            rotated = true;
-          } else if ((i == 3 && j == 6) || (i == 3 && j == 5) || (i == 3 && j == 4) || (i == 3 && j == 3) || (i == 4 && j == 3) || (i == 5 && j == 3) || (i == 6 && j == 3)) {
-            symptom = symptoms[4];
-            rotated = true;
-          } else {
-            continue;
-          }
-
-          const val = parseInt(sliders[symptom].value);
-          if (val === 0) continue;
-          const img = icons[symptom][val];
-
-          if (rotated) {
-            push();
-            translate(width / 2, height / 2);
-            rotate(PI / 4);
-            translate(-width / 2, -height / 2);
-          }
-
-          drawMirroredSymmetry(img, x, y, tileSize);
-          if (rotated) {
-            pop();
-          }
-          
-        }
-      }
-      }
-    
-
-    function drawMirroredSymmetry(img, x, y, size) {
-  // Fill background white for each tile area
-  // Top-left (original)
-      push();
-      image(img, x, y, size, size);
-      pop();
-
-      // Top-right (mirrored horizontally)
-      push();
-      translate(width - x, y);
-      scale(-1, 1);
-      image(img, 0, 0, size, size);
-      pop();
-
-      // Bottom-left (mirrored vertically)
-      push();
-      translate(x, height - y);
-      scale(1, -1);
-      image(img, 0, 0, size, size);
-      pop();
-
-      // Bottom-right (mirrored both)
-      push();
-      translate(width - x, height - y);
-      scale(-1, -1);
-      image(img, 0, 0, size, size);
-      pop();
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
