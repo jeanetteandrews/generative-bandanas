@@ -1,22 +1,46 @@
+@font-face {
+  font-family: 'Phase';
+  src: url('fonts/Phase.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 body {
   margin: 0;
-  font-family: sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100vh;
   background: white;
+  font-family: 'Phase', 'Helvetica', 'Arial', sans-serif;
+  letter-spacing: .05rem;
+  font-size: 15px;
 }
 
+button {
+  border-radius: 4px;
+  letter-spacing: .05rem;
+  line-height: 1.15;
+  user-select: none;
+  outline: none;
+  font-size: 15px;
+  width: 260px;
+}
+
+#main-interface {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* ✅ centers children horizontally */
+}
 
 #sketch-holder {
   position: relative; /* Required for absolute overlay */
   display: grid;
-  grid-template-columns: repeat(14, 50px);
-  grid-template-rows: repeat(14, 50px);
+  grid-template-columns: repeat(14, 40px);
+  grid-template-rows: repeat(14, 40px);
   width: fit-content;
-  outline: 2px solid black;
+  outline: 1px solid black;
   background-color: white;
 }
 
@@ -25,8 +49,8 @@ body {
   /* top: 150px; 
   left: 150px; */
   display: grid;
-  grid-template-columns: repeat(8, 50px);
-  grid-template-rows: repeat(8, 50px);
+  grid-template-columns: repeat(8, 40px);
+  grid-template-rows: repeat(8, 40px);
   /* pointer-events: none;  */
 }
 
@@ -37,16 +61,16 @@ body {
   transform: translate(-50%, -50%) rotate(45deg);
   transform-origin: center;
   display: grid;
-  grid-template-columns: repeat(8, 50px);
-  grid-template-rows: repeat(8, 50px);
+  grid-template-columns: repeat(8, 40px);
+  grid-template-rows: repeat(8, 40px);
   pointer-events: none; /* optional if you don’t want interactions */
   z-index: 10;
 }
 
 
 #overlay-grid .overlay-cell {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -56,8 +80,8 @@ body {
 }
 
 .grid-cell, .overlay-cell {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   padding: 0;
   margin: 0;
   overflow: hidden;
@@ -68,27 +92,30 @@ body {
 }
 
 #controls {
-  margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
+  margin-top: 7px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* ✅ 3 equal-width columns */
   gap: 10px;
-  justify-content: center;
+  justify-items: center;
 }
 
 #controls button {
+  font-family: 'Phase', 'Helvetica', 'Arial', sans-serif;
   padding: 5px 10px;
   border: 1px solid #000;
   background-color: white;
   color: black;
   cursor: pointer;
+  border-radius: 4px;
 }
 
-#controls button.active {
+#controls button.active, #next-button {
   background-color: black;
   color: white;
 }
 
 .control-button {
+  font-family: 'Phase', 'Helvetica', 'Arial', sans-serif;
   background-color: white;
   color: black;
   border: 1px solid black;
@@ -98,7 +125,6 @@ body {
   transition: background-color 0.2s, color 0.2s;
 }
 
-.control-button:hover,
 .control-button.active {
   background-color: black;
   color: white;
@@ -119,7 +145,8 @@ body {
 }
 
 #intro-screen .button-group button {
-  padding: 10px;
+  font-family: 'Phase', 'Helvetica', 'Arial', sans-serif;
+  padding: 8px;
   margin: 5px;
   border: 1px solid black;
   background-color: white;
@@ -129,4 +156,62 @@ body {
 #intro-screen .button-group button.selected {
   background-color: black;
   color: white;
+}
+
+#symptom-selection {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(7, auto);
+  gap: 10px;
+}
+
+#next-button {
+  background-color: black !important;
+  color: white !important;
+}
+
+#slider-download-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; /* 3 equal columns */
+  gap: 10px;
+  align-items: center;
+  margin-top: 7px;
+  margin-bottom: 7px;
+  width: 100%;
+  max-width: 660px; /* Optional: aligns with 3 buttons at 200px width */
+}
+
+#slider-download-row #variant-slider {
+  width: 100%;
+}
+
+#slider-download-row #download-btn {
+  justify-self: end;
+}
+
+#slider-download-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-top: 7px;
+  margin-bottom: 7px;
+  width: 100%;
+  max-width: 660px;
+}
+
+#selected-label {
+  white-space: nowrap; /* ✅ force to one line */
+}
+
+#variant-slider {
+  width: 100%;
+}
+
+#download-btn {
+  white-space: nowrap;
+}
+
+#variant-slider {
+  width: 260px;
 }

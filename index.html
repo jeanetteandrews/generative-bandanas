@@ -10,26 +10,26 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <div id="intro-screen">
-  <h1>SELECT SYMPTOMS</h1>
-  <div id="symptom-selection" class="button-group"></div>
-  <button id="next-button" class="control-button">Next</button>
-</div>
-<div id="main-interface">
-    <div id="sketch-holder">
-  <!-- grid will be appended here -->
-  <div id="overlay-wrapper">
-    <div id="overlay-grid"></div>
+  <div id="intro-screen">
+   <h1>Select Symptoms</h1>
+   <div id="symptom-selection" class="button-group">
   </div>
-</div>
+ </div>
+<div id="main-interface">
+  <div id="sketch-holder">
+  <!-- grid will be appended here -->
+   <div id="overlay-wrapper">
+    <div id="overlay-grid"></div>
+   </div>
+ </div>
 
   <div id="controls" class="button-group"></div>
-  <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
-    <label id="slider-label" for="variant-slider">Selected: None</label>
-    <input id="variant-slider" type="range" min="1" max="7" value="1">
-  </div>
+  <div id="slider-download-row">
+  <div id="selected-label">Selected: </div>
+  <input id="variant-slider" type="range" min="1" max="7" value="1">
   <button id="download-btn" class="control-button">Download Pattern</button>
 </div>
+
 
 
   <script src="script.js"></script>

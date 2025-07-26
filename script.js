@@ -1,18 +1,21 @@
-const symptoms = [
-  "angryoutbursts", "avoidance", "emotionalnumbing", "exaggeratedstartleresponse",
-  "excessivealertness", "feelingdetached", "flashbacks", "intrusivethoughts",
-  "lossofinterest", "nightmares", "problemswithconcentration", "selfblame",
-  "sleepdisturbance"
-];
+let currentSymptom = null;
+const selectedSlider = document.getElementById("variant-slider"); // input[type=range]
+const selectedLabel = document.getElementById("selected-label");   // div or span
 
+const symptoms = [
+  "Angry Outbursts", "Avoidance", "Emotional Numbing", "Exaggerated Startle Response",
+  "Excessive Alertness", "Feeling Detached", "Flashbacks", "Intrusive Thoughts",
+  "Loss of Interest", "Nightmares", "Problems With Concentration", "Self Blame",
+  "Sleep Disturbance"
+];
 const introScreen = document.getElementById("intro-screen");
 const selectionContainer = document.getElementById("symptom-selection");
-const nextButton = document.getElementById("next-button");
 const mainInterface = document.getElementById("main-interface");
 const controlsDiv = document.getElementById("controls");
 const sketchHolder = document.getElementById("sketch-holder");
 const overlayGrid = document.getElementById("overlay-grid");
 
+const symptomVariants = {}; // stores { symptomName: variantNumber }
 
 const selectedSymptoms = new Set();
 
@@ -33,7 +36,12 @@ symptoms.forEach(symptom => {
   selectionContainer.appendChild(btn);
 });
 
-// When "Next" is clicked
+const nextButton = document.createElement("button");
+nextButton.id = "next-button";
+nextButton.classList.add("control-button");
+nextButton.textContent = "Next";
+selectionContainer.appendChild(nextButton);
+
 nextButton.addEventListener("click", () => {
   if (selectedSymptoms.size === 0) {
     alert("Please select at least one symptom.");
@@ -45,23 +53,42 @@ nextButton.addEventListener("click", () => {
   mainInterface.style.display = "block";
 
   // Build control buttons based on selected symptoms
-  selectedSymptoms.forEach(symptom => {
+  const selectedArray = Array.from(selectedSymptoms);
+
+  selectedArray.forEach((symptom, index) => {
     const btn = document.createElement("button");
     btn.textContent = symptom;
     btn.classList.add("control-button");
+
     btn.addEventListener("click", () => {
       document.querySelectorAll("#controls button").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
 
-      // Show correct SVG variant logic goes here (if you have that already)
-      // For example: updateSliderFor(symptom);
+      currentSymptom = symptom;
+      selectedLabel.textContent = `Selected: ${symptom}`;
+
+      const variant = symptomVariants[symptom] || 1;
+      selectedSlider.value = variant;
+      updateSVGVariant(symptom, variant);
     });
+
+
     controlsDiv.appendChild(btn);
+
+    // Automatically select the first symptom
+    if (index === 0) {
+      btn.classList.add("active");
+      currentSymptom = symptom;
+      selectedLabel.textContent = `Selected: ${symptom}`;
+      selectedSlider.value = 1;
+      updateSVGVariant(symptom, 1);
+    }
   });
+
   createMainGrid();
   createOverlayGrid();
-
 });
+
 
 // Initially hide main interface
 mainInterface.style.display = "none";
@@ -263,3 +290,96 @@ function createOverlayGrid() {
     }
   }
 }
+
+const selectedArray = Array.from(selectedSymptoms);
+
+selectedArray.forEach((symptom, index) => {
+  const btn = document.createElement("button");
+  btn.textContent = symptom;
+  btn.classList.add("control-button");
+
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#controls button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    currentSymptom = symptom;
+    selectedLabel.textContent = `Selected: ${symptom}`;
+    selectedSlider.value = 1;
+    updateSVGVariant(symptom, 1);
+  });
+
+  controlsDiv.appendChild(btn);
+
+  // Automatically select the first symptom
+  if (index === 0) {
+    btn.classList.add("active");
+    currentSymptom = symptom;
+    selectedLabel.textContent = `Selected: ${symptom}`;
+    selectedSlider.value = 1;
+    updateSVGVariant(symptom, 1);
+  }
+});
+
+selectedSlider.addEventListener("input", () => {
+  if (currentSymptom) {
+    const variant = parseInt(selectedSlider.value);
+    symptomVariants[currentSymptom] = variant;  // store it
+    updateSVGVariant(currentSymptom, variant);
+  }
+});
+
+function updateSVGVariant(symptom, variant) {
+  const selector = `[data-symptom="${symptom}"]`;
+
+  document.querySelectorAll(selector).forEach(cell => {
+    fetch(`symptoms/${symptom}${variant}.svg`)
+      .then(res => res.text())
+      .then(svgMarkup => {
+        cell.innerHTML = svgMarkup;
+
+        const svgElement = cell.querySelector('svg');
+        svgElement.setAttribute('width', '100%');
+        svgElement.setAttribute('height', '100%');
+        svgElement.setAttribute('preserveAspectRatio', 'none');
+
+        const [_, col, row] = cell.id.split('-').map(Number);
+        const isOverlay = cell.classList.contains('overlay-cell');
+        const flipX = isOverlay ? col >= 4 : col >= 7;
+        const flipY = isOverlay ? row >= 4 : row >= 7;
+
+        const scaleX = flipX ? -1 : 1;
+        const scaleY = flipY ? -1 : 1;
+        svgElement.style.transform = `scale(${scaleX}, ${scaleY})`;
+        svgElement.style.transformOrigin = 'center center';
+      });
+  });
+}
+
+document.getElementById('download-btn').addEventListener('click', async () => {
+  document.body.style.cursor = 'wait'; // Show loading cursor
+
+  try {
+    const canvas = await html2canvas(document.getElementById('sketch-holder'));
+    const link = document.createElement('a');
+    link.download = 'pattern.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  } finally {
+    document.body.style.cursor = 'default'; // Reset cursor
+  }
+});
+
+// document.getElementById("download-btn").addEventListener("click", () => {
+//   const sketchHolder = document.getElementById("sketch-holder");
+
+//   html2canvas(sketchHolder, {
+//     backgroundColor: null, // transparent background
+//     scale: 2               // higher resolution
+//   }).then(canvas => {
+//     const link = document.createElement("a");
+//     link.download = "symptom-pattern.png";
+//     link.href = canvas.toDataURL("image/png");
+//     link.click();
+//   });
+// });
+
