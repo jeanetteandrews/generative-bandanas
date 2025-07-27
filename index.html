@@ -4,34 +4,438 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Symptom Pattern Generator</title>
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script> -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js"></script>
-  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <style>
+    @font-face {
+      font-family: 'Phase';
+      src: url('fonts/Phase.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    body {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: white;
+      font-family: 'Phase', 'Helvetica', 'Arial', sans-serif;
+      letter-spacing: .05rem;
+      font-size: 15px;
+    }
+
+    button {
+      border-radius: 4px;
+      letter-spacing: .05rem;
+      line-height: 1.15;
+      user-select: none;
+      outline: none;
+      font-size: 15px;
+      width: 260px;
+    }
+
+    #main-interface {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #sketch-holder {
+      position: relative;
+      width: 600px;
+      height: 600px;
+      outline: 1px solid black;
+      background-color: white;
+      margin-bottom: 10px;
+    }
+
+    #controls {
+      margin-top: 7px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      justify-items: center;
+    }
+
+    #controls button {
+      font-family: 'Phase', 'Helvetica', 'Arial', sans-serif;
+      padding: 5px 10px;
+      border: 1px solid #000;
+      background-color: white;
+      color: black;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    #controls button.active, #next-button {
+      background-color: black;
+      color: white;
+    }
+
+    .control-button {
+      font-family: 'Phase', 'Helvetica', 'Arial', sans-serif;
+      background-color: white;
+      color: black;
+      border: 1px solid black;
+      padding: 8px 12px;
+      margin: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .control-button.active {
+      background-color: black;
+      color: white;
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    #intro-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    #intro-screen .button-group button {
+      font-family: 'Phase', 'Helvetica', 'Arial', sans-serif;
+      padding: 8px;
+      margin: 5px;
+      border: 1px solid black;
+      background-color: white;
+      cursor: pointer;
+    }
+
+    #intro-screen .button-group button.selected {
+      background-color: black;
+      color: white;
+    }
+
+    #symptom-selection {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(7, auto);
+      gap: 10px;
+    }
+
+    #next-button {
+      background-color: black !important;
+      color: white !important;
+    }
+
+    #slider-download-row {
+      display: grid;
+      grid-template-columns: 1fr 2fr auto;
+      gap: 10px;
+      align-items: center;
+      margin-top: 7px;
+      margin-bottom: 7px;
+      width: 100%;
+      max-width: 660px;
+    }
+
+    #selected-label {
+      white-space: nowrap;
+    }
+
+    #variant-slider {
+      width: 260px;
+    }
+
+    #download-btn {
+      white-space: nowrap;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  </style>
 </head>
 <body>
   <div id="intro-screen">
    <h1>Select Symptoms</h1>
    <div id="symptom-selection" class="button-group">
-  </div>
- </div>
-<div id="main-interface">
-  <div id="sketch-holder">
-  <!-- grid will be appended here -->
-   <div id="overlay-wrapper">
-    <div id="overlay-grid"></div>
    </div>
- </div>
+  </div>
 
-  <div id="controls" class="button-group"></div>
-  <div id="slider-download-row">
-  <div id="selected-label">Selected: </div>
-  <input id="variant-slider" type="range" min="1" max="7" value="1">
-  <button id="download-btn" class="control-button">Download Pattern</button>
-</div>
+  <div id="main-interface" style="display: none;">
+    <div id="sketch-holder">
+    </div>
 
+    <div id="controls" class="button-group"></div>
+    <div id="slider-download-row">
+      <div id="selected-label">Selected: </div>
+      <input id="variant-slider" type="range" min="1" max="7" value="1">
+      <button id="download-btn" class="control-button">Download Pattern</button>
+    </div>
+  </div>
 
+  <script>
+    let currentSymptom = null;
+    const selectedSlider = document.getElementById("variant-slider");
+    const selectedLabel = document.getElementById("selected-label");
 
-  <script src="script.js"></script>
+    const symptoms = [
+        "Angry Outbursts", "Avoidance", "Emotional Numbing", "Exaggerated Startle Response",
+        "Excessive Alertness", "Feeling Detached", "Flashbacks", "Intrusive Thoughts",
+        "Loss of Interest", "Nightmares", "Problems With Concentration", "Self Blame",
+        "Sleep Disturbance"
+    ];
+
+    const introScreen = document.getElementById("intro-screen");
+    const selectionContainer = document.getElementById("symptom-selection");
+    const mainInterface = document.getElementById("main-interface");
+    const controlButtonsDiv = document.getElementById("controls");
+
+    const symptomVariants = {}; // stores { symptomName: variantNumber }
+    const selectedSymptoms = new Set();
+
+    // P5.js variables
+    let icons = {};
+    let iconPositions = [];
+    let userSelectedSymptoms = [];
+
+    // Create symptom selection buttons
+    symptoms.forEach(symptom => {
+        const btn = document.createElement("button");
+        btn.textContent = symptom;
+        btn.addEventListener("click", () => {
+            if (selectedSymptoms.has(symptom)) {
+                selectedSymptoms.delete(symptom);
+                btn.classList.remove("selected");
+            } else {
+                selectedSymptoms.add(symptom);
+                btn.classList.add("selected");
+            }
+        });
+        selectionContainer.appendChild(btn);
+    });
+
+    const nextButton = document.createElement("button");
+    nextButton.id = "next-button";
+    nextButton.textContent = "Next";
+    selectionContainer.appendChild(nextButton);
+
+    nextButton.addEventListener("click", () => {
+        if (selectedSymptoms.size === 0) {
+            alert("Please select at least one symptom.");
+            return;
+        }
+        
+        // Store selected symptoms for P5.js
+        userSelectedSymptoms = Array.from(selectedSymptoms);
+        
+        // Hide intro screen and show main interface
+        introScreen.style.display = "none";
+        mainInterface.style.display = "flex";
+        
+        // Build control buttons based on selected symptoms
+        userSelectedSymptoms.forEach((symptom, index) => {
+            const btn = document.createElement("button");
+            btn.textContent = symptom;
+            btn.classList.add("control-button");
+            
+            btn.addEventListener("click", () => {
+                document.querySelectorAll(".control-button").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                
+                currentSymptom = symptom;
+                selectedLabel.textContent = `Selected: ${symptom}`;
+                
+                const variant = symptomVariants[symptom] || 1;
+                selectedSlider.value = variant;
+            });
+            
+            controlButtonsDiv.appendChild(btn);
+            
+            // Initialize variant for this symptom
+            if (!symptomVariants[symptom]) {
+                symptomVariants[symptom] = 1;
+            }
+            
+            // Automatically select the first symptom
+            if (index === 0) {
+                btn.classList.add("active");
+                currentSymptom = symptom;
+                selectedLabel.textContent = `Selected: ${symptom}`;
+                selectedSlider.value = 1;
+            }
+        });
+        
+        // Start P5.js sketch after user selections are made
+        startP5Sketch();
+    });
+
+    // Slider event listener
+    selectedSlider.addEventListener("input", () => {
+        if (currentSymptom && p5Instance) {
+            const variant = parseInt(selectedSlider.value);
+            symptomVariants[currentSymptom] = variant;
+            // Force redraw to show the new SVG variants
+            p5Instance.redraw();
+        }
+    });
+
+    // Download button event listener
+    document.getElementById('download-btn').addEventListener('click', () => {
+        if (p5Instance) {
+            p5Instance.saveCanvas('symptom-pattern', 'png');
+        } else {
+            alert('Canvas not ready for download');
+        }
+    });
+
+    // P5.js instance variable
+    let p5Instance = null;
+
+    function startP5Sketch() {
+        // Create P5 instance in instance mode to avoid global conflicts
+        p5Instance = new p5((p) => {
+            p.preload = function() {
+                // Only load icons for selected symptoms to speed up loading
+                for (let symptom of userSelectedSymptoms) {
+                    icons[symptom] = [];
+                    for (let i = 1; i <= 7; i++) {
+                        icons[symptom][i] = p.loadImage(`symptoms/${symptom}${i}.svg`);
+                    }
+                }
+            };
+
+            p.setup = function() {
+                let canvas = p.createCanvas(600, 600);
+                canvas.parent('sketch-holder');
+                p.angleMode(p.DEGREES);
+                p.background(255);
+                
+                // Generate initial pattern
+                generateRandomIcons(p);
+                
+                // Draw the initial pattern
+                drawPattern(p);
+                
+                // Disable continuous drawing - we'll redraw manually when needed
+                p.noLoop();
+            };
+
+            p.draw = function() {
+                drawPattern(p);
+            };
+        });
+    }
+
+    function generateRandomIcons(p) {
+        if (userSelectedSymptoms.length === 0) return;
+        
+        iconPositions = [];
+        let numIcons = 40;
+        let maxAttempts = 200;
+        let possibleSymmetries = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 6, 6, 6, 6, 6, 6, 6, 8, 8, 8, 8, 8, 8, 12, 12, 12, 40];
+        
+        for (let i = 0; i < numIcons; i++) {
+            let placed = false;
+            let attempts = 0;
+            
+            let iconSymmetry = p.random(possibleSymmetries);
+            let iconAngle = 360 / iconSymmetry;
+            
+            while (!placed && attempts < maxAttempts) {
+                let maxRadius = p.min(p.width, p.height) / 2 - 10;
+                let radius = p.random(10, p.width-100);
+                let randomAngle = p.random(0, iconAngle);
+                
+                let x = radius * p.cos(randomAngle);
+                let y = radius * p.sin(randomAngle);
+                
+                // Only use selected symptoms
+                let randomSymptom = p.random(userSelectedSymptoms);
+                let iconSize = p.random(10, 75);
+                
+                // Check for collisions
+                let collision = false;
+                for (let existing of iconPositions) {
+                    let distance = p.dist(x, y, existing.x, existing.y);
+                    let minDistance = (iconSize + existing.size) / 2 + 20;
+                    
+                    if (distance < minDistance) {
+                        collision = true;
+                        break;
+                    }
+                }
+                
+                if (!collision) {
+                    iconPositions.push({
+                        x: x,
+                        y: y,
+                        symptom: randomSymptom,
+                        size: iconSize,
+                        symmetry: iconSymmetry,
+                        angle: iconAngle
+                    });
+                    placed = true;
+                }
+                
+                attempts++;
+            }
+            
+            // Fallback placement
+            if (!placed && attempts >= maxAttempts) {
+                let radius = p.random(10, p.width-100);
+                let randomAngle = p.random(0, iconAngle);
+                let x = radius * p.cos(randomAngle);
+                let y = radius * p.sin(randomAngle);
+                let randomSymptom = p.random(userSelectedSymptoms);
+                
+                iconPositions.push({
+                    x: x,
+                    y: y,
+                    symptom: randomSymptom,
+                    size: 15,
+                    symmetry: iconSymmetry,
+                    angle: iconAngle
+                });
+            }
+        }
+    }
+
+    function drawPattern(p) {
+        p.background(255);
+        p.translate(p.width / 2, p.height / 2);
+        
+        for (let iconData of iconPositions) {
+            // Get the current variant level for this symptom
+            let currentLevel = symptomVariants[iconData.symptom] || 1;
+            let img = icons[iconData.symptom] && icons[iconData.symptom][currentLevel];
+            
+            if (img) {
+                p.push();
+                
+                for (let i = 0; i < iconData.symmetry; i++) {
+                    p.push();
+                    p.translate(iconData.x, iconData.y);
+                    p.image(img, -iconData.size/2, -iconData.size/2, iconData.size, iconData.size);
+                    p.pop();
+                    
+                    p.push();
+                    p.scale(1, -1);
+                    p.translate(iconData.x, iconData.y);
+                    p.image(img, -iconData.size/2, -iconData.size/2, iconData.size, iconData.size);
+                    p.pop();
+                    
+                    p.rotate(iconData.angle);
+                }
+                
+                p.pop();
+            }
+        }
+    }
+  </script>
 </body>
 </html>
