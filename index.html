@@ -328,6 +328,15 @@
             p.draw = function() {
                 drawPattern(p);
             };
+
+            p.keyPressed = function() {
+                if (p.key === ' ') {
+                    // Regenerate random pattern when spacebar is pressed
+                    generateRandomIcons(p);
+                    p.redraw();
+                    return false; // Prevent default spacebar behavior
+                }
+            };
         });
     }
 
