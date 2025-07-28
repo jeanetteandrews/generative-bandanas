@@ -80,7 +80,7 @@ initializeMainInterface();
 function calculateDistribution(numActiveSymptoms) {
     if (numActiveSymptoms === 0) return [];
     
-    const totalIcons = 13; // Changed from 26 to 13
+    const totalIcons = 26;
     const baseAmount = Math.floor(totalIcons / numActiveSymptoms);
     const remainder = totalIcons % numActiveSymptoms;
     
@@ -278,9 +278,9 @@ function generateRandomIcons(p) {
     if (userSelectedSymptoms.length === 0) return;
     
     iconPositions = [];
-    let numIcons = 13; // Changed from 26 to 13
+    let numIcons = 26;
     let maxAttempts = 200; // Increased attempts
-    let possibleSymmetries = [1, 2, 2, 4, 4, 6, 8];
+    let possibleSymmetries = [1, 1, 2, 2, 2, 4, 4, 4, 6, 6, 8];
     
     for (let i = 0; i < numIcons; i++) {
         let placed = false;
@@ -299,24 +299,24 @@ function generateRandomIcons(p) {
                     y = 0;
                     break;
                 case 2: // Red
-                    x = p.random(0, 2500 /2);
-                    y = p.random(0, 2500 /2);
+                    x = p.random(0, 2600 /2);
+                    y = p.random(0, 2600 /2);
                     break;
                 case 4: // Blue
-                    x = p.random(0, 2500 /2);
-                    y = p.random(x, 2500 /2);
+                    x = p.random(0, 2600 /2);
+                    y = p.random(x, 2600 /2);
                     break;
                 case 6: // Green
-                    x = p.random(100, 2500 / 2 - 300);
+                    x = p.random(100, 2600 / 2 - 100);
                     ymin = 100;
-                    ymax = 3 * x - 300;
+                    ymax = 3 * x - 100;
                     if (ymin > ymax) [ymin, ymax] = [ymax, ymin]; // flip if needed
                     y = p.random(ymin, ymax);
                     break;
                 case 8: // Black
-                    x = p.random(100, 2500 / 2 - 400);
-                    ymin = 100;
-                    ymax = 4 * x - 400;
+                    x = p.random(400, 2600 / 2 - 200);
+                    ymin = 400;
+                    ymax = 4 * x - 200;
                     if (ymin > ymax) [ymin, ymax] = [ymax, ymin]; // flip if needed
                     y = p.random(ymin, ymax);
                     break;
@@ -328,16 +328,22 @@ function generateRandomIcons(p) {
                 //     y = p.random(ymin, ymax);
                 //     break;
                 // case 12: // Purple
-                //     x = p.random(200, 2600 / 2 - 100);
-                //     ymin = 200;
-                //     ymax = 6 * x - 100;
+                //     x = p.random(100, 2600 / 2 - 200);
+                //     ymin = 100;
+                //     ymax = 4 * x - 200;
                 //     if (ymin > ymax) [ymin, ymax] = [ymax, ymin]; // flip if needed
                 //     y = p.random(ymin, ymax);
+                //     // maxRadius = p.min(p.width, p.height) / 2 - 10;
+                //     // radius = p.random(10, p.width-100);
+                //     // randomAngle = p.random(0, iconAngle);
+                    
+                //     // x = radius * p.cos(randomAngle);
+                //     // y = radius * p.sin(randomAngle);
                 //     break;
             }
             
             let randomSymptom = p.random(userSelectedSymptoms);
-            let iconSize = p.random(200, 300); // Preferred size range
+            let iconSize = p.random(150, 250); // Preferred size range
             
             // Apply snapping logic based on symmetry and icon size
             let snapDistance = iconSize / 2;
@@ -365,66 +371,66 @@ function generateRandomIcons(p) {
                 if (distanceToLine < snapDistance) {
                     y = x; // Snap to y=x line
                 }
-            } else if (iconSymmetry === 6) {
-                // Snap to axes if within half icon size
-                if (x < snapDistance) {
-                    x = 0; // Snap to y-axis (x=0)
-                }
-                if (y < snapDistance) {
-                    y = 0; // Snap to x-axis (y=0)
-                }
+            // } else if (iconSymmetry === 6) {
+            //     // Snap to axes if within half icon size
+            //     if (x < snapDistance) {
+            //         x = 0; // Snap to y-axis (x=0)
+            //     }
+            //     if (y < snapDistance) {
+            //         y = 0; // Snap to x-axis (y=0)
+            //     }
                 
-                // Snap to y=3x line if within half icon size
-                let distanceToLine = Math.abs(y - 3 * x) / Math.sqrt(1 + 9); // Distance from point to line y=3x
-                if (distanceToLine < snapDistance) {
-                    y = 3 * x; // Snap to y=3x line
-                    snappedToDiagonal = true;
-                }
-            } else if (iconSymmetry === 8) {
-                // Snap to axes if within half icon size
-                if (x < snapDistance) {
-                    x = 0; // Snap to y-axis (x=0)
-                }
-                if (y < snapDistance) {
-                    y = 0; // Snap to x-axis (y=0)
-                }
+            //     // Snap to y=3x line if within half icon size
+            //     let distanceToLine = Math.abs(y - 3 * x) / Math.sqrt(1 + 9); // Distance from point to line y=3x
+            //     if (distanceToLine < snapDistance) {
+            //         y = 3 * x; // Snap to y=3x line
+            //         snappedToDiagonal = true;
+            //     }
+            // } else if (iconSymmetry === 8) {
+            //     // Snap to axes if within half icon size
+            //     if (x < snapDistance) {
+            //         x = 0; // Snap to y-axis (x=0)
+            //     }
+            //     if (y < snapDistance) {
+            //         y = 0; // Snap to x-axis (y=0)
+            //     }
                 
-                // Snap to y=4x line if within half icon size
-                let distanceToLine = Math.abs(y - 4 * x) / Math.sqrt(1 + 16); // Distance from point to line y=4x
-                if (distanceToLine < snapDistance) {
-                    y = 4 * x; // Snap to y=4x line
-                    snappedToDiagonal = true;
-                }
-            } else if (iconSymmetry === 10) {
-                // Snap to axes if within half icon size
-                if (x < snapDistance) {
-                    x = 0; // Snap to y-axis (x=0)
-                }
-                if (y < snapDistance) {
-                    y = 0; // Snap to x-axis (y=0)
-                }
+            //     // Snap to y=4x line if within half icon size
+            //     let distanceToLine = Math.abs(y - 4 * x) / Math.sqrt(1 + 16); // Distance from point to line y=4x
+            //     if (distanceToLine < snapDistance) {
+            //         y = 4 * x; // Snap to y=4x line
+            //         snappedToDiagonal = true;
+            //     }
+            // } else if (iconSymmetry === 10) {
+            //     // Snap to axes if within half icon size
+            //     if (x < snapDistance) {
+            //         x = 0; // Snap to y-axis (x=0)
+            //     }
+            //     if (y < snapDistance) {
+            //         y = 0; // Snap to x-axis (y=0)
+            //     }
                 
-                // Snap to y=5x line if within half icon size
-                let distanceToLine = Math.abs(y - 5 * x) / Math.sqrt(1 + 25); // Distance from point to line y=5x
-                if (distanceToLine < snapDistance) {
-                    y = 5 * x; // Snap to y=5x line
-                    snappedToDiagonal = true;
-                }
-            } else if (iconSymmetry === 12) {
-                // Snap to axes if within half icon size
-                if (x < snapDistance) {
-                    x = 0; // Snap to y-axis (x=0)
-                }
-                if (y < snapDistance) {
-                    y = 0; // Snap to x-axis (y=0)
-                }
+            //     // Snap to y=5x line if within half icon size
+            //     let distanceToLine = Math.abs(y - 5 * x) / Math.sqrt(1 + 25); // Distance from point to line y=5x
+            //     if (distanceToLine < snapDistance) {
+            //         y = 5 * x; // Snap to y=5x line
+            //         snappedToDiagonal = true;
+            //     }
+            // } else if (iconSymmetry === 12) {
+            //     // Snap to axes if within half icon size
+            //     if (x < snapDistance) {
+            //         x = 0; // Snap to y-axis (x=0)
+            //     }
+            //     if (y < snapDistance) {
+            //         y = 0; // Snap to x-axis (y=0)
+            //     }
                 
-                // Snap to y=6x line if within half icon size
-                let distanceToLine = Math.abs(y - 6 * x) / Math.sqrt(1 + 36); // Distance from point to line y=6x
-                if (distanceToLine < snapDistance) {
-                    y = 6 * x; // Snap to y=6x line
-                    snappedToDiagonal = true;
-                }
+            //     // Snap to y=6x line if within half icon size
+            //     let distanceToLine = Math.abs(y - 6 * x) / Math.sqrt(1 + 36); // Distance from point to line y=6x
+            //     if (distanceToLine < snapDistance) {
+            //         y = 6 * x; // Snap to y=6x line
+            //         snappedToDiagonal = true;
+            //     }
             }
             
             // Step 3 & 5: Check collision with all symmetrical positions of existing icons
@@ -454,7 +460,7 @@ function generateRandomIcons(p) {
                 for (let newPos of newIconPositions) {
                     for (let existingPos of existingPositions) {
                         let distance = p.dist(newPos.x, newPos.y, existingPos.x, existingPos.y);
-                        let minDistance = (iconSize + existing.size) / 2 - 40;
+                        let minDistance = (iconSize + existing.size) / 2 - 30;
                         
                         if (distance < minDistance) {
                             collision = true;
@@ -496,13 +502,13 @@ function generateRandomIcons(p) {
                 let y = p.random(-p.height/2 + 100, p.height/2 - 100);
                 
                 let randomSymptom = p.random(userSelectedSymptoms);
-                let fallbackSize = 150; // Smaller fallback size
+                let fallbackSize = 100; // Smaller fallback size
                 
                 // Check only basic collision with reduced minimum distance
                 let collision = false;
                 for (let existing of iconPositions) {
                     let distance = p.dist(x, y, existing.x, existing.y);
-                    let minDistance = (fallbackSize + existing.size) / 2;
+                    let minDistance = (fallbackSize + existing.size) / 2 - 20;
                     
                     if (distance < minDistance) {
                         collision = true;
@@ -560,10 +566,6 @@ function generateSymmetricalPositions(x, y, symmetry, angle, p) {
     const isOnYAxis = (x === 0);
     const isOnXAxis = (y === 0);
     const isOnDiagonal = (Math.abs(y - x) < 1); // y = x line (allowing for floating point precision)
-    const isOn3xLine = (Math.abs(y - 3 * x) < 1); // y = 3x line
-    const isOn4xLine = (Math.abs(y - 4 * x) < 1); // y = 4x line
-    const isOn5xLine = (Math.abs(y - 5 * x) < 1); // y = 5x line
-    const isOn6xLine = (Math.abs(y - 6 * x) < 1); // y = 6x line
     
     for (let i = 0; i < symmetry; i++) {
         let currentAngle = i * angle;
@@ -586,27 +588,8 @@ function generateSymmetricalPositions(x, y, symmetry, angle, p) {
             if (isOnXAxis || isOnYAxis || isOnDiagonal) {
                 shouldMirror = false;
             }
-        } else if (symmetry === 6) {
-            // For 6-fold symmetry, don't mirror if on x-axis, y-axis, or y=3x line
-            if (isOnXAxis || isOnYAxis || isOn3xLine) {
-                shouldMirror = false;
-            }
-        } else if (symmetry === 8) {
-            // For 8-fold symmetry, don't mirror if on x-axis, y-axis, or y=4x line
-            if (isOnXAxis || isOnYAxis || isOn4xLine) {
-                shouldMirror = false;
-            }
-        } else if (symmetry === 10) {
-            // For 10-fold symmetry, don't mirror if on x-axis, y-axis, or y=5x line
-            if (isOnXAxis || isOnYAxis || isOn5xLine) {
-                shouldMirror = false;
-            }
-        } else if (symmetry === 12) {
-            // For 12-fold symmetry, don't mirror if on x-axis, y-axis, or y=6x line
-            if (isOnXAxis || isOnYAxis || isOn6xLine) {
-                shouldMirror = false;
-            }
         }
+        // Add more conditions for other symmetries if needed
         
         if (shouldMirror) {
             // Mirrored position rotated
@@ -619,79 +602,11 @@ function generateSymmetricalPositions(x, y, symmetry, angle, p) {
     return positions;
 }
 
-function drawSymmetryLines(p) {
-    if (!showSymmetryLines) return;
-    
-    // Get all unique symmetries used in current pattern
-    let usedSymmetries = new Set();
-    for (let iconData of iconPositions) {
-        let currentLevel = symptomVariants[iconData.symptom] || 0;
-        if (currentLevel > 0) { // Only consider visible icons
-            usedSymmetries.add(iconData.symmetry);
-        }
-    }
-    
-    // Draw lines for each used symmetry
-    for (let symmetry of usedSymmetries) {
-        // Skip drawing lines for symmetry 1 (single icon)
-        if (symmetry === 1) continue;
-        
-        let angleStep = 360 / symmetry;
-        let lineColor;
-        
-        // Set line color based on symmetry
-        switch(symmetry) {
-            case 2:
-                lineColor = p.color(255, 0, 0); // Red
-                break;
-            case 4:
-                lineColor = p.color(0, 0, 255); // Blue
-                break;
-            case 6:
-                lineColor = p.color(0, 255, 0); // Green
-                break;
-            case 8:
-                lineColor = p.color(0, 0, 0); // Black
-                break;
-            case 10:
-                lineColor = p.color(255, 165, 0); // Orange
-                break;
-            case 12:
-                lineColor = p.color(128, 0, 128); // Purple
-                break;
-            default:
-                lineColor = p.color(128, 128, 128); // Gray for other symmetries
-                break;
-        }
-        
-        p.stroke(lineColor);
-        p.strokeWeight(2);
-        
-        // Draw symmetry lines
-        for (let i = 0; i < symmetry; i++) {
-            let angle = i * angleStep;
-            let lineLength = p.width; // Make lines go across entire canvas
-            
-            p.push();
-            p.rotate(angle);
-            p.line(0, 0, lineLength/2, 0);
-            p.line(0, 0, -lineLength/2, 0);
-            p.pop();
-        }
-        
-        // Also draw the reflection line (horizontal line for vertical mirroring)
-        p.stroke(lineColor);
-        p.strokeWeight(1);
-        p.line(-p.width/2, 0, p.width/2, 0);
-    }
-    
-    p.noStroke(); // Reset stroke for other drawing
-}
-
 function drawPattern(p) {
     p.background(255);
     p.translate(p.width / 2, p.height / 2);
     
+
     for (let iconData of iconPositions) {
         // Get the current variant level for this symptom
         let currentLevel = symptomVariants[iconData.symptom] || 0;
@@ -797,12 +712,64 @@ function drawPattern(p) {
                     }
                 }
             }
-            
+            // drawBorderIcons(p);
             p.pop();
             p.noTint(); // Reset tint for next icon
         }
     }
 }
+
+
+
+// Draw icons around the perimeter with white square backgrounds
+// function drawBorderIcons(p) {
+//     const borderSymptom = (userSelectedSymptoms.length > 0 ? userSelectedSymptoms[0] : symptoms[0]);
+//     const borderVariant = 1; // Always use variant 1 for border
+
+//     // Calculate how many icons fit exactly along each side
+//     const borderIconSize = p.width / 15; // 10 icons per side, adjust as needed
+//     const iconsPerSide = Math.round(p.width / borderIconSize);
+
+//     // Top and bottom
+//     for (let i = 0; i < iconsPerSide; i++) {
+//         let x = -p.width / 2 + borderIconSize / 2 + i * borderIconSize;
+//         let yTop = -p.height / 2 + borderIconSize / 2;
+//         let yBottom = p.height / 2 - borderIconSize / 2;
+
+//         drawBorderIconAt(p, x, yTop, borderIconSize, borderSymptom, borderVariant);
+//         drawBorderIconAt(p, x, yBottom, borderIconSize, borderSymptom, borderVariant);
+//     }
+//     // Left and right (skip corners)
+//     for (let i = 1; i < iconsPerSide - 1; i++) {
+//         let y = -p.height / 2 + borderIconSize / 2 + i * borderIconSize;
+//         let xLeft = -p.width / 2 + borderIconSize / 2;
+//         let xRight = p.width / 2 - borderIconSize / 2;
+
+//         drawBorderIconAt(p, xLeft, y, borderIconSize, borderSymptom, borderVariant);
+//         drawBorderIconAt(p, xRight, y, borderIconSize, borderSymptom, borderVariant);
+//     }
+// }
+
+// // Helper to draw a single border icon with a white square background
+// function drawBorderIconAt(p, x, y, size, symptom, variant) {
+//     // Draw white square background
+//     p.push();
+//     p.noStroke();
+//     p.fill(255);
+//     p.rectMode(p.CENTER);
+//     p.rect(x, y, size + 20, size + 20); // Slightly larger than icon
+//     p.pop();
+
+//     // Draw icon
+//     let img = icons[symptom] && icons[symptom][variant];
+//     if (img) {
+//         p.push();
+//         p.imageMode(p.CENTER);
+//         p.image(img, x, y, size, size);
+//         p.pop();
+//     }
+// }
+// ...existing code...
 
 // Restart button event listener
 document.getElementById('restart-btn').addEventListener('click', () => {
