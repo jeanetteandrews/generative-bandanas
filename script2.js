@@ -94,17 +94,133 @@ function calculateDistribution(numActiveSymptoms) {
     return distribution;
 }
 
-// Function to redistribute symptoms among icons
+// Function to add a new symptom to random positions
+function addSymptomToRandomPositions(newSymptom) {
+    if (!p5Instance || iconPositions.length === 0) return;
+    
+    // Calculate how many positions this new symptom should occupy
+    const distribution = calculateDistribution(activeSymptoms.length);
+    const symptomIndex = activeSymptoms.indexOf(newSymptom);
+    const targetCount = distribution[symptomIndex];
+    
+    // Find all positions that are currently empty (no symptom assigned)
+    const emptyPositions = [];
+    for (let i = 0; i < iconPositions.length; i++) {
+        if (!iconPositions[i].symptom) {
+            emptyPositions.push(i);
+        }
+    }
+    
+    // If we don't have enough empty positions, we need to reassign some
+    const availablePositions = emptyPositions.length >= targetCount 
+        ? emptyPositions 
+        : getAllAvailablePositions();
+    
+    // Shuffle available positions and take the first targetCount
+    for (let i = availablePositions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [availablePositions[i], availablePositions[j]] = [availablePositions[j], availablePositions[i]];
+    }
+    
+    // Assign the new symptom to random positions
+    for (let i = 0; i < targetCount && i < availablePositions.length; i++) {
+        iconPositions[availablePositions[i]].symptom = newSymptom;
+    }
+    
+    console.log(`Added symptom "${newSymptom}" to ${targetCount} random positions`);
+}
+
+// Function to remove a specific symptom and redistribute remaining symptoms
+function removeSymptomAndRedistribute(symptomToRemove) {
+    if (!p5Instance || iconPositions.length === 0) return;
+    
+    // Find all positions with the symptom to remove
+    const removedPositions = [];
+    for (let i = 0; i < iconPositions.length; i++) {
+        if (iconPositions[i].symptom === symptomToRemove) {
+            iconPositions[i].symptom = null; // Clear the symptom
+            removedPositions.push(i);
+        }
+    }
+    
+    if (activeSymptoms.length === 0) {
+        console.log(`Removed symptom "${symptomToRemove}" from ${removedPositions.length} positions`);
+        return;
+    }
+    
+    // Calculate new distribution for remaining active symptoms
+    const distribution = calculateDistribution(activeSymptoms.length);
+    
+    // Shuffle the removed positions to randomize reassignment
+    for (let i = removedPositions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [removedPositions[i], removedPositions[j]] = [removedPositions[j], removedPositions[i]];
+    }
+    
+    // Redistribute remaining symptoms to the freed positions
+    let positionIndex = 0;
+    for (let symptomIndex = 0; symptomIndex < activeSymptoms.length; symptomIndex++) {
+        const symptom = activeSymptoms[symptomIndex];
+        const currentCount = countSymptomPositions(symptom);
+        const targetCount = distribution[symptomIndex];
+        const needed = targetCount - currentCount;
+        
+        // Add this symptom to freed positions if it needs more
+        for (let i = 0; i < needed && positionIndex < removedPositions.length; i++) {
+            iconPositions[removedPositions[positionIndex]].symptom = symptom;
+            positionIndex++;
+        }
+    }
+    
+    console.log(`Removed symptom "${symptomToRemove}" and redistributed remaining symptoms to ${removedPositions.length} positions`);
+}
+
+// Helper function to get all available positions (for fallback)
+function getAllAvailablePositions() {
+    return Array.from({ length: iconPositions.length }, (_, i) => i);
+}
+
+// Helper function to count how many positions a symptom currently occupies
+function countSymptomPositions(symptom) {
+    let count = 0;
+    for (let i = 0; i < iconPositions.length; i++) {
+        if (iconPositions[i].symptom === symptom) {
+            count++;
+        }
+    }
+    return count;
+}
+
+// Modified main function that handles both adding and removing symptoms
+function updateSymptomPositions(addedSymptom = null, removedSymptom = null) {
+    if (removedSymptom) {
+        removeSymptomAndRedistribute(removedSymptom);
+    }
+    
+    if (addedSymptom) {
+        addSymptomToRandomPositions(addedSymptom);
+    }
+}
+
+// Keep the old redistributeSymptoms function for cases where you need full redistribution (like regenerate)
 function redistributeSymptoms() {
     if (!p5Instance || iconPositions.length === 0) return;
     
     if (activeSymptoms.length === 0) {
-        // No active symptoms - all icons stay as they are but won't be visible
+        // Clear all symptoms from positions
+        for (let i = 0; i < iconPositions.length; i++) {
+            iconPositions[i].symptom = null;
+        }
         return;
     }
     
     // Calculate distribution
     const distribution = calculateDistribution(activeSymptoms.length);
+    
+    // Clear all current assignments
+    for (let i = 0; i < iconPositions.length; i++) {
+        iconPositions[i].symptom = null;
+    }
     
     // Shuffle the iconPositions array to randomize assignment
     const shuffledIndices = Array.from({ length: iconPositions.length }, (_, i) => i);
@@ -131,7 +247,7 @@ function redistributeSymptoms() {
                 activeSymptoms.map((symptom, i) => `${symptom}: ${distribution[i]}`));
 }
 
-// Slider event listener
+// Updated slider event listener - use incremental updates
 selectedSlider.addEventListener("input", () => {
     if (currentSymptom && p5Instance) {
         const variant = parseInt(selectedSlider.value);
@@ -145,20 +261,20 @@ selectedSlider.addEventListener("input", () => {
             selectedLabel.textContent = `Selected: ${currentSymptom} (Variant ${variant})`;
         }
         
-        // Update active symptoms list
+        // Update active symptoms list with incremental changes
         const wasActive = previousVariant > 0;
         const isActive = variant > 0;
         
         if (!wasActive && isActive) {
-            // Symptom became active
+            // Symptom became active - add it to the list and distribute incrementally
             activeSymptoms.push(currentSymptom);
-            redistributeSymptoms();
+            updateSymptomPositions(currentSymptom, null); // Add new symptom
         } else if (wasActive && !isActive) {
-            // Symptom became inactive
+            // Symptom became inactive - remove it from the list and redistribute incrementally
             const index = activeSymptoms.indexOf(currentSymptom);
             if (index > -1) {
                 activeSymptoms.splice(index, 1);
-                redistributeSymptoms();
+                updateSymptomPositions(null, currentSymptom); // Remove symptom
             }
         }
         
@@ -197,11 +313,11 @@ selectedSlider.addEventListener("input", () => {
     }
 });
 
-// Regenerate button event listener
+// Regenerate button event listener - keep full redistribution for this case
 document.getElementById('regenerate-btn').addEventListener('click', () => {
     if (p5Instance) {
         generateRandomIcons(p5Instance);
-        redistributeSymptoms(); // Redistribute after generating new pattern
+        redistributeSymptoms(); // Full redistribution makes sense when regenerating the pattern
         p5Instance.redraw();
     }
 });
@@ -253,24 +369,24 @@ function startP5Sketch() {
             drawPattern(p);
         };
 
-        // p.keyPressed = function() {
-        //     if (p.key === ' ') {
-        //         // Toggle between original and symmetrical pattern when spacebar is pressed
-        //         showOriginalOnly = !showOriginalOnly;
-        //         p.redraw();
-        //         return false; // Prevent default spacebar behavior
-        //     } else if (p.key === 'q' || p.key === 'Q') {
-        //         // Toggle symmetry lines visibility
-        //         showSymmetryLines = !showSymmetryLines;
-        //         p.redraw();
-        //         return false;
-        //     } else if (p.key === 'w' || p.key === 'W') {
-        //         // Toggle all symbols to black
-        //         showAllBlack = !showAllBlack;
-        //         p.redraw();
-        //         return false;
-        //     }
-        // };
+        p.keyPressed = function() {
+            if (p.key === ' ') {
+                // Toggle between original and symmetrical pattern when spacebar is pressed
+                showOriginalOnly = !showOriginalOnly;
+                p.redraw();
+                return false; // Prevent default spacebar behavior
+            } else if (p.key === 'q' || p.key === 'Q') {
+                // Toggle symmetry lines visibility
+                showSymmetryLines = !showSymmetryLines;
+                p.redraw();
+                return false;
+            } else if (p.key === 'w' || p.key === 'W') {
+                // Toggle all symbols to black
+                showAllBlack = !showAllBlack;
+                p.redraw();
+                return false;
+            }
+        };
     });
 }
 
@@ -320,26 +436,6 @@ function generateRandomIcons(p) {
                     if (ymin > ymax) [ymin, ymax] = [ymax, ymin]; // flip if needed
                     y = p.random(ymin, ymax);
                     break;
-                // case 10: // Orange
-                //     x = p.random(250, 2600 / 2 - 100);
-                //     ymin = 250;
-                //     ymax = 5 * x - 100;
-                //     if (ymin > ymax) [ymin, ymax] = [ymax, ymin]; // flip if needed
-                //     y = p.random(ymin, ymax);
-                //     break;
-                // case 12: // Purple
-                //     x = p.random(100, 2600 / 2 - 200);
-                //     ymin = 100;
-                //     ymax = 4 * x - 200;
-                //     if (ymin > ymax) [ymin, ymax] = [ymax, ymin]; // flip if needed
-                //     y = p.random(ymin, ymax);
-                //     // maxRadius = p.min(p.width, p.height) / 2 - 10;
-                //     // radius = p.random(10, p.width-100);
-                //     // randomAngle = p.random(0, iconAngle);
-                    
-                //     // x = radius * p.cos(randomAngle);
-                //     // y = radius * p.sin(randomAngle);
-                //     break;
             }
             
             let randomSymptom = p.random(userSelectedSymptoms);
@@ -371,66 +467,6 @@ function generateRandomIcons(p) {
                 if (distanceToLine < snapDistance) {
                     y = x; // Snap to y=x line
                 }
-            // } else if (iconSymmetry === 6) {
-            //     // Snap to axes if within half icon size
-            //     if (x < snapDistance) {
-            //         x = 0; // Snap to y-axis (x=0)
-            //     }
-            //     if (y < snapDistance) {
-            //         y = 0; // Snap to x-axis (y=0)
-            //     }
-                
-            //     // Snap to y=3x line if within half icon size
-            //     let distanceToLine = Math.abs(y - 3 * x) / Math.sqrt(1 + 9); // Distance from point to line y=3x
-            //     if (distanceToLine < snapDistance) {
-            //         y = 3 * x; // Snap to y=3x line
-            //         snappedToDiagonal = true;
-            //     }
-            // } else if (iconSymmetry === 8) {
-            //     // Snap to axes if within half icon size
-            //     if (x < snapDistance) {
-            //         x = 0; // Snap to y-axis (x=0)
-            //     }
-            //     if (y < snapDistance) {
-            //         y = 0; // Snap to x-axis (y=0)
-            //     }
-                
-            //     // Snap to y=4x line if within half icon size
-            //     let distanceToLine = Math.abs(y - 4 * x) / Math.sqrt(1 + 16); // Distance from point to line y=4x
-            //     if (distanceToLine < snapDistance) {
-            //         y = 4 * x; // Snap to y=4x line
-            //         snappedToDiagonal = true;
-            //     }
-            // } else if (iconSymmetry === 10) {
-            //     // Snap to axes if within half icon size
-            //     if (x < snapDistance) {
-            //         x = 0; // Snap to y-axis (x=0)
-            //     }
-            //     if (y < snapDistance) {
-            //         y = 0; // Snap to x-axis (y=0)
-            //     }
-                
-            //     // Snap to y=5x line if within half icon size
-            //     let distanceToLine = Math.abs(y - 5 * x) / Math.sqrt(1 + 25); // Distance from point to line y=5x
-            //     if (distanceToLine < snapDistance) {
-            //         y = 5 * x; // Snap to y=5x line
-            //         snappedToDiagonal = true;
-            //     }
-            // } else if (iconSymmetry === 12) {
-            //     // Snap to axes if within half icon size
-            //     if (x < snapDistance) {
-            //         x = 0; // Snap to y-axis (x=0)
-            //     }
-            //     if (y < snapDistance) {
-            //         y = 0; // Snap to x-axis (y=0)
-            //     }
-                
-            //     // Snap to y=6x line if within half icon size
-            //     let distanceToLine = Math.abs(y - 6 * x) / Math.sqrt(1 + 36); // Distance from point to line y=6x
-            //     if (distanceToLine < snapDistance) {
-            //         y = 6 * x; // Snap to y=6x line
-            //         snappedToDiagonal = true;
-            //     }
             }
             
             // Step 3 & 5: Check collision with all symmetrical positions of existing icons
@@ -620,38 +656,6 @@ function drawPattern(p) {
         
         if (img) {
             p.tint(0, 0, 0);
-            // Set color based on toggle or symmetry
-            // if (showAllBlack) {
-            //     p.tint(0, 0, 0); // All black when toggle is on
-            // } else {
-            //     // Set color based on symmetry
-            //     switch(iconData.symmetry) {
-            //         case 1:
-            //             p.tint(192, 192, 192); // Silver/Light Gray
-            //             break;
-            //         case 2:
-            //             p.tint(255, 0, 0); // Red
-            //             break;
-            //         case 4:
-            //             p.tint(0, 0, 255); // Blue
-            //             break;
-            //         case 6:
-            //             p.tint(0, 255, 0); // Green
-            //             break;
-            //         case 8:
-            //             p.tint(0, 0, 0); // Black
-            //             break;
-            //         case 10:
-            //             p.tint(255, 165, 0); // Orange
-            //             break;
-            //         case 12:
-            //             p.tint(128, 0, 128); // Purple
-            //             break;
-            //         default:
-            //             p.tint(128, 128, 128); // Gray for other symmetries
-            //             break;
-            //     }
-            // }
             
             p.push();
             
@@ -712,64 +716,11 @@ function drawPattern(p) {
                     }
                 }
             }
-            // drawBorderIcons(p);
             p.pop();
             p.noTint(); // Reset tint for next icon
         }
     }
 }
-
-
-
-// Draw icons around the perimeter with white square backgrounds
-// function drawBorderIcons(p) {
-//     const borderSymptom = (userSelectedSymptoms.length > 0 ? userSelectedSymptoms[0] : symptoms[0]);
-//     const borderVariant = 1; // Always use variant 1 for border
-
-//     // Calculate how many icons fit exactly along each side
-//     const borderIconSize = p.width / 15; // 10 icons per side, adjust as needed
-//     const iconsPerSide = Math.round(p.width / borderIconSize);
-
-//     // Top and bottom
-//     for (let i = 0; i < iconsPerSide; i++) {
-//         let x = -p.width / 2 + borderIconSize / 2 + i * borderIconSize;
-//         let yTop = -p.height / 2 + borderIconSize / 2;
-//         let yBottom = p.height / 2 - borderIconSize / 2;
-
-//         drawBorderIconAt(p, x, yTop, borderIconSize, borderSymptom, borderVariant);
-//         drawBorderIconAt(p, x, yBottom, borderIconSize, borderSymptom, borderVariant);
-//     }
-//     // Left and right (skip corners)
-//     for (let i = 1; i < iconsPerSide - 1; i++) {
-//         let y = -p.height / 2 + borderIconSize / 2 + i * borderIconSize;
-//         let xLeft = -p.width / 2 + borderIconSize / 2;
-//         let xRight = p.width / 2 - borderIconSize / 2;
-
-//         drawBorderIconAt(p, xLeft, y, borderIconSize, borderSymptom, borderVariant);
-//         drawBorderIconAt(p, xRight, y, borderIconSize, borderSymptom, borderVariant);
-//     }
-// }
-
-// // Helper to draw a single border icon with a white square background
-// function drawBorderIconAt(p, x, y, size, symptom, variant) {
-//     // Draw white square background
-//     p.push();
-//     p.noStroke();
-//     p.fill(255);
-//     p.rectMode(p.CENTER);
-//     p.rect(x, y, size + 20, size + 20); // Slightly larger than icon
-//     p.pop();
-
-//     // Draw icon
-//     let img = icons[symptom] && icons[symptom][variant];
-//     if (img) {
-//         p.push();
-//         p.imageMode(p.CENTER);
-//         p.image(img, x, y, size, size);
-//         p.pop();
-//     }
-// }
-// ...existing code...
 
 // Restart button event listener
 document.getElementById('restart-btn').addEventListener('click', () => {
@@ -780,6 +731,13 @@ document.getElementById('restart-btn').addEventListener('click', () => {
     
     // Clear active symptoms
     activeSymptoms = [];
+    
+    // Clear all icon symptoms (since all symptoms are now inactive)
+    if (iconPositions.length > 0) {
+        for (let i = 0; i < iconPositions.length; i++) {
+            iconPositions[i].symptom = null;
+        }
+    }
     
     // Update the current symptom display
     if (currentSymptom) {
