@@ -288,7 +288,7 @@ selectedSlider.addEventListener("input", () => {
                 6: 'Green',
                 8: 'Black',
                 10: 'Orange',
-                12: 'Purple'
+                // 12: 'Purple'
             };
             
             // Count icons that belong to the current symptom only
@@ -331,6 +331,200 @@ document.getElementById('download-btn').addEventListener('click', () => {
     }
 });
 
+document.getElementById('print-btn').addEventListener('click', () => {
+    if (p5Instance) {
+        // Get the canvas and convert to data URL
+        const canvas = p5Instance.canvas;
+        const dataURL = canvas.toDataURL('image/png');
+        
+        // Create a hidden iframe for printing
+        const printFrame = document.createElement('iframe');
+        printFrame.style.position = 'absolute';
+        printFrame.style.top = '-1000px';
+        printFrame.style.left = '-1000px';
+        printFrame.style.width = '0';
+        printFrame.style.height = '0';
+        printFrame.style.border = 'none';
+        
+        document.body.appendChild(printFrame);
+        
+        // Write the canvas image to the iframe
+        const frameDoc = printFrame.contentWindow.document;
+        frameDoc.write(`
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <title>Symptom Pattern</title>
+                    <style>
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
+                        body {
+                            background: white;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            min-height: 100vh;
+                        }
+                        img {
+                            max-width: 100%;
+                            max-height: 100%;
+                            object-fit: contain;
+                        }
+                        @media print {
+                            body {
+                                margin: 0;
+                                padding: 0;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                min-height: 100vh;
+                            }
+                            img {
+                                width: 100%;
+                                height: 100vh;
+                                object-fit: contain;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <img src="${dataURL}" alt="Symptom Pattern" />
+                </body>
+            </html>
+        `);
+        frameDoc.close();
+        
+        // Wait for the image to load, then print
+        const img = frameDoc.querySelector('img');
+        img.onload = function() {
+            printFrame.contentWindow.focus();
+            printFrame.contentWindow.print();
+            
+            // Remove the iframe after a short delay
+            setTimeout(() => {
+                document.body.removeChild(printFrame);
+            }, 1000);
+        };
+        
+    } else {
+        alert('Canvas not ready for printing');
+    }
+});
+
+// Replace the existing email button event listener with this modified version:
+
+document.getElementById('email-btn').addEventListener('click', () => {
+    if (!p5Instance) {
+        alert('Canvas not ready.');
+        return;
+    }
+
+    const email = prompt('Enter your email address:');
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        alert('Please enter a valid email address');
+        return;
+    }
+
+    const btn = document.getElementById('email-btn');
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = 'Sending...';
+
+    const canvas = p5Instance.canvas;
+
+    canvas.toBlob(blob => {
+        if (!blob) {
+            alert('Could not generate image from canvas');
+            btn.disabled = false;
+            btn.textContent = originalText;
+            return;
+        }
+
+        const file = new File([blob], 'symptom-pattern.png', { type: 'image/png' });
+
+        // Fill the form fields
+        const emailInput = document.getElementById('user-email');
+        const fileInput = document.getElementById('canvas-file');
+        emailInput.value = email;
+
+        // Create DataTransfer to simulate file upload
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+
+        // Submit form
+        document.getElementById('email-form').submit();
+
+        // Reset UI
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.textContent = originalText;
+            alert(`✅ Image sent to ${email}`);
+        }, 2000);
+    }, 'image/png');
+});
+
+// Add this new function to create a tiny version of the canvas
+function createTinyCanvas() {
+    const tinyCanvas = document.createElement('canvas');
+    tinyCanvas.width = 10;
+    tinyCanvas.height = 10;
+    const ctx = tinyCanvas.getContext('2d');
+    
+    // Fill with white background
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, 10, 10);
+    
+    // Create a simplified representation of the active symptoms
+    // Each active symptom gets a colored pixel
+    let pixelIndex = 0;
+    const colors = ['#FF0000', '#0000FF', '#00FF00', '#000000', '#FFA500', '#800080', '#C0C0C0'];
+    
+    for (let i = 0; i < activeSymptoms.length && pixelIndex < 100; i++) {
+        const symptom = activeSymptoms[i];
+        const variant = symptomVariants[symptom];
+        
+        if (variant > 0) {
+            // Calculate pixel position (row, col)
+            const row = Math.floor(pixelIndex / 10);
+            const col = pixelIndex % 10;
+            
+            // Use different colors based on variant level
+            const colorIndex = Math.min(variant - 1, colors.length - 1);
+            ctx.fillStyle = colors[colorIndex];
+            ctx.fillRect(col, row, 1, 1);
+            
+            pixelIndex++;
+        }
+    }
+    
+    return tinyCanvas;
+}
+
+// Alternative version that creates an even smaller data representation
+function createMicroCanvas() {
+    const microCanvas = document.createElement('canvas');
+    microCanvas.width = 1;
+    microCanvas.height = 1;
+    const ctx = microCanvas.getContext('2d');
+    
+    // Create a single pixel that represents the overall "intensity" of symptoms
+    let totalIntensity = 0;
+    for (let symptom of activeSymptoms) {
+        totalIntensity += symptomVariants[symptom];
+    }
+    
+    // Map intensity to grayscale (0-255)
+    const intensity = Math.min(255, totalIntensity * 10);
+    ctx.fillStyle = `rgb(${intensity}, ${intensity}, ${intensity})`;
+    ctx.fillRect(0, 0, 1, 1);
+    
+    return microCanvas;
+}
+
 function startP5Sketch() {
     // Create P5 instance in instance mode to avoid global conflicts
     p5Instance = new p5((p) => {
@@ -345,7 +539,7 @@ function startP5Sketch() {
         };
 
         p.setup = function() {
-            let canvas = p.createCanvas(2600, 2600);
+            let canvas = p.createCanvas(3800, 3800);
             // let canvas = p.createCanvas(3000, 3000);
             canvas.parent('sketch-holder');
 
@@ -369,24 +563,24 @@ function startP5Sketch() {
             drawPattern(p);
         };
 
-        p.keyPressed = function() {
-            if (p.key === ' ') {
-                // Toggle between original and symmetrical pattern when spacebar is pressed
-                showOriginalOnly = !showOriginalOnly;
-                p.redraw();
-                return false; // Prevent default spacebar behavior
-            } else if (p.key === 'q' || p.key === 'Q') {
-                // Toggle symmetry lines visibility
-                showSymmetryLines = !showSymmetryLines;
-                p.redraw();
-                return false;
-            } else if (p.key === 'w' || p.key === 'W') {
-                // Toggle all symbols to black
-                showAllBlack = !showAllBlack;
-                p.redraw();
-                return false;
-            }
-        };
+        // p.keyPressed = function() {
+        //     if (p.key === ' ') {
+        //         // Toggle between original and symmetrical pattern when spacebar is pressed
+        //         showOriginalOnly = !showOriginalOnly;
+        //         p.redraw();
+        //         return false; // Prevent default spacebar behavior
+        //     } else if (p.key === 'q' || p.key === 'Q') {
+        //         // Toggle symmetry lines visibility
+        //         showSymmetryLines = !showSymmetryLines;
+        //         p.redraw();
+        //         return false;
+        //     } else if (p.key === 'w' || p.key === 'W') {
+        //         // Toggle all symbols to black
+        //         showAllBlack = !showAllBlack;
+        //         p.redraw();
+        //         return false;
+        //     }
+        // };
     });
 }
 
@@ -394,9 +588,10 @@ function generateRandomIcons(p) {
     if (userSelectedSymptoms.length === 0) return;
     
     iconPositions = [];
-    let numIcons = 26;
+    let numIcons = 16;
     let maxAttempts = 200; // Increased attempts
-    let possibleSymmetries = [1, 1, 2, 2, 2, 4, 4, 4, 6, 6, 8];
+    // let possibleSymmetries = [1, 1, 2, 2, 2, 4, 4, 4, 6, 6, 8, 10];
+    let possibleSymmetries = [1, 2, 4, 6, 8, 10]
     
     for (let i = 0; i < numIcons; i++) {
         let placed = false;
@@ -415,31 +610,47 @@ function generateRandomIcons(p) {
                     y = 0;
                     break;
                 case 2: // Red
-                    x = p.random(0, 2600 /2);
-                    y = p.random(0, 2600 /2);
+                    x = p.random(0, 3000 /2);
+                    x = Math.max(0, x); 
+                    y = p.random(0, 3000 /2);
+                    y = Math.max(0, y);
                     break;
                 case 4: // Blue
-                    x = p.random(0, 2600 /2);
-                    y = p.random(x, 2600 /2);
+                    x = p.random(0, 3000 /2);
+                    y = p.random(x, 3000 /2);
                     break;
                 case 6: // Green
-                    x = p.random(100, 2600 / 2 - 100);
-                    ymin = 100;
-                    ymax = 3 * x - 100;
-                    if (ymin > ymax) [ymin, ymax] = [ymax, ymin]; // flip if needed
-                    y = p.random(ymin, ymax);
+                    x = p.random(0, 3000 / 6 - 100);
+                    y = p.random(x, 3000 /2);
+                    // ymin = 100;
+                    // ymax = 3 * x - 200;
+                    // if (ymin > ymax) [ymin, ymax] = [ymax, ymin]; // flip if needed
+                    // y = p.random(ymin, ymax);
                     break;
                 case 8: // Black
-                    x = p.random(400, 2600 / 2 - 200);
-                    ymin = 400;
-                    ymax = 4 * x - 200;
-                    if (ymin > ymax) [ymin, ymax] = [ymax, ymin]; // flip if needed
-                    y = p.random(ymin, ymax);
+                    x = p.random(100,  3000 / 8 - 100);
+                    y = p.random(x+200, 3000 /2);
+                    // ymin = 400;
+                    // ymax = 4 * x - 200;
+                    // if (ymin > ymax) [ymin, ymax] = [ymax, ymin]; // flip if needed
+                    // y = p.random(ymin, ymax);
                     break;
+                case 10: // Orange
+                    x = p.random(0, 3100 / 10 - 200);
+                    y = p.random(x+200, 3100 /2);
+                    // ymin = 400;
+                    // ymax = 5 * (x - 200);
+                    // if (ymin > ymax) [ymin, ymax] = [ymax, ymin]; // flip if needed
+                    // y = p.random(ymin, ymax);
+                    break;
+                // case 12: // Purple
+                //     x = p.random(200, 3100 / 12 - 300);
+                //     y = p.random(x+200, 3100 /2);
+                //     break;
             }
             
             let randomSymptom = p.random(userSelectedSymptoms);
-            let iconSize = p.random(150, 250); // Preferred size range
+            let iconSize = p.random(190, 290); // Preferred size range
             
             // Apply snapping logic based on symmetry and icon size
             let snapDistance = iconSize / 2;
@@ -496,7 +707,7 @@ function generateRandomIcons(p) {
                 for (let newPos of newIconPositions) {
                     for (let existingPos of existingPositions) {
                         let distance = p.dist(newPos.x, newPos.y, existingPos.x, existingPos.y);
-                        let minDistance = (iconSize + existing.size) / 2 - 30;
+                        let minDistance = (iconSize + existing.size) / 2 - 20;
                         
                         if (distance < minDistance) {
                             collision = true;
@@ -538,7 +749,7 @@ function generateRandomIcons(p) {
                 let y = p.random(-p.height/2 + 100, p.height/2 - 100);
                 
                 let randomSymptom = p.random(userSelectedSymptoms);
-                let fallbackSize = 100; // Smaller fallback size
+                let fallbackSize = 170; // Smaller fallback size
                 
                 // Check only basic collision with reduced minimum distance
                 let collision = false;
@@ -656,6 +867,38 @@ function drawPattern(p) {
         
         if (img) {
             p.tint(0, 0, 0);
+            // Set color based on toggle or symmetry
+            // if (showAllBlack) {
+            //     p.tint(0, 0, 0); // All black when toggle is on
+            // } else {
+            //     // Set color based on symmetry
+            //     switch(iconData.symmetry) {
+            //         case 1:
+            //             p.tint(192, 192, 192); // Silver/Light Gray
+            //             break;
+            //         case 2:
+            //             p.tint(255, 0, 0); // Red
+            //             break;
+            //         case 4:
+            //             p.tint(0, 0, 255); // Blue
+            //             break;
+            //         case 6:
+            //             p.tint(0, 255, 0); // Green
+            //             break;
+            //         case 8:
+            //             p.tint(0, 0, 0); // Black
+            //             break;
+            //         case 10:
+            //             p.tint(255, 165, 0); // Orange
+            //             break;
+            //         // case 12:
+            //         //     p.tint(128, 0, 128); // Purple
+            //         //     break;
+            //         // default:
+            //         //     p.tint(128, 128, 128); // Gray for other symmetries
+            //         //     break;
+            //     }
+            // }
             
             p.push();
             
@@ -720,6 +963,74 @@ function drawPattern(p) {
             p.noTint(); // Reset tint for next icon
         }
     }
+     // Draw thick black border inside the canvas over all icons
+    p.push();
+    p.resetMatrix(); // Reset transformations so the border aligns with the canvas edges
+    
+    let borderThickness = 224; // thickness of the border in pixels
+    p.stroke(0);
+    p.strokeWeight(borderThickness);
+    p.noFill();
+    
+    // Draw rect inset by half the strokeWeight to fully show the border inside the canvas
+    p.rect(borderThickness / 2, borderThickness / 2, p.width - borderThickness, p.height - borderThickness);
+    
+    p.pop();
+
+    p.push();
+    p.resetMatrix(); // Reset transformations so the border aligns with the canvas edges
+    
+    borderThickness = 204; // thickness of the border in pixels
+    p.stroke(255);
+    p.strokeWeight(borderThickness);
+    p.noFill();
+    
+    // Draw rect inset by half the strokeWeight to fully show the border inside the canvas
+    p.rect(borderThickness / 2, borderThickness / 2, p.width - borderThickness, p.height - borderThickness);
+    
+    p.pop();
+
+
+    p.push();
+    p.resetMatrix(); // Reset transformations so the border aligns with the canvas edges
+    
+    borderThickness = 160; // thickness of the border in pixels
+    p.stroke(0);
+    p.strokeWeight(borderThickness);
+    p.noFill();
+    
+    // Draw rect inset by half the strokeWeight to fully show the border inside the canvas
+    p.rect(borderThickness / 2, borderThickness / 2, p.width - borderThickness, p.height - borderThickness);
+    
+    p.pop();
+
+    p.push();
+    p.resetMatrix(); // Reset transformations so the border aligns with the canvas edges
+    
+    borderThickness = 148; // thickness of the border in pixels
+    p.stroke(255);
+    p.strokeWeight(borderThickness);
+    p.noFill();
+    
+    // Draw rect inset by half the strokeWeight to fully show the border inside the canvas
+    p.rect(borderThickness / 2, borderThickness / 2, p.width - borderThickness, p.height - borderThickness);
+    
+    p.pop();
+
+
+
+    p.push();
+    p.resetMatrix(); // Reset transformations so the border aligns with the canvas edges
+    
+    borderThickness = 104; // thickness of the border in pixels
+    p.stroke(0);
+    p.strokeWeight(borderThickness);
+    p.noFill();
+    
+    // Draw rect inset by half the strokeWeight to fully show the border inside the canvas
+    p.rect(borderThickness / 2, borderThickness / 2, p.width - borderThickness, p.height - borderThickness);
+    
+    p.pop();
 }
 
 // Restart button event listener

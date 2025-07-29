@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Symptom Pattern Generator</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -20,6 +21,12 @@
      <div id="action-buttons-row">
             <button id="regenerate-btn">Regenerate Pattern</button>
             <button id="download-btn">Download</button>
+            <button id="print-btn">Print</button>
+            <button id="email-btn">Email</button>
+            <form id="formsubmit-hidden-form" action="https://formsubmit.co/xodamoko@mailgolem.com" method="POST" enctype="multipart/form-data" style="display:none;">
+              <input type="email" name="email" id="formsubmit-email" required>
+              <input type="file" name="attachment" id="formsubmit-file" accept="image/png">
+            </form>
             <button id="restart-btn">Restart</button>
         </div>
   </div>
