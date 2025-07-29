@@ -331,178 +331,146 @@ document.getElementById('download-btn').addEventListener('click', () => {
     }
 });
 
-document.getElementById('print-btn').addEventListener('click', () => {
+document.getElementById('email-btn').addEventListener('click', () => {
     if (p5Instance) {
-        // Get the canvas and convert to data URL
+        // Get user's email input
+        const emailAddress = prompt('Enter email address to send your pattern:');
+        if (!emailAddress) return;
+        
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailAddress)) {
+            alert('Please enter a valid email address');
+            return;
+        }
+        
+        // Show loading message
+        const originalText = document.getElementById('email-btn').textContent;
+        document.getElementById('email-btn').textContent = 'Sending...';
+        document.getElementById('email-btn').disabled = true;
+        
+        // Get the canvas as base64 data
         const canvas = p5Instance.canvas;
         const dataURL = canvas.toDataURL('image/png');
         
-        // Create a hidden iframe for printing
-        const printFrame = document.createElement('iframe');
-        printFrame.style.position = 'absolute';
-        printFrame.style.top = '-1000px';
-        printFrame.style.left = '-1000px';
-        printFrame.style.width = '0';
-        printFrame.style.height = '0';
-        printFrame.style.border = 'none';
+        // Remove the data URL prefix to get just the base64 data
+        const base64Data = dataURL.split(',')[1];
         
-        document.body.appendChild(printFrame);
-        
-        // Write the canvas image to the iframe
-        const frameDoc = printFrame.contentWindow.document;
-        frameDoc.write(`
-            <!DOCTYPE html>
-            <html>
-                <head>
-                    <title>Symptom Pattern</title>
-                    <style>
-                        * {
-                            margin: 0;
-                            padding: 0;
-                            box-sizing: border-box;
-                        }
-                        body {
-                            background: white;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            min-height: 100vh;
-                        }
-                        img {
-                            max-width: 100%;
-                            max-height: 100%;
-                            object-fit: contain;
-                        }
-                        @media print {
-                            body {
-                                margin: 0;
-                                padding: 0;
-                                display: flex;
-                                justify-content: center;
-                                align-items: center;
-                                min-height: 100vh;
-                            }
-                            img {
-                                width: 100%;
-                                height: 100vh;
-                                object-fit: contain;
-                            }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <img src="${dataURL}" alt="Symptom Pattern" />
-                </body>
-            </html>
-        `);
-        frameDoc.close();
-        
-        // Wait for the image to load, then print
-        const img = frameDoc.querySelector('img');
-        img.onload = function() {
-            printFrame.contentWindow.focus();
-            printFrame.contentWindow.print();
-            
-            // Remove the iframe after a short delay
-            setTimeout(() => {
-                document.body.removeChild(printFrame);
-            }, 1000);
+        // EmailJS configuration - REPLACE WITH YOUR ACTUAL VALUES
+        const emailjsConfig = {
+            serviceID: 'service_97icrg4',     // e.g., 'service_abc123'
+            templateID: 'template_67mp5sd',   // e.g., 'template_xyz789'
+            userID: 'hakRH0LcXtdEjX3aD'            // e.g., 'user_123abc' or just '123abc'
         };
         
-    } else {
-        alert('Canvas not ready for printing');
-    }
-});
-
-// Replace the existing email button event listener with this modified version:
-
-document.getElementById('email-btn').addEventListener('click', () => {
-    if (!p5Instance) {
-        alert('Canvas not ready.');
-        return;
-    }
-
-    const email = prompt('Enter your email address:');
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        alert('Please enter a valid email address');
-        return;
-    }
-
-    const btn = document.getElementById('email-btn');
-    btn.disabled = true;
-    const originalText = btn.textContent;
-    btn.textContent = 'Sending...';
-
-    const canvas = p5Instance.canvas;
-
-    canvas.toBlob(blob => {
-        if (!blob) {
-            alert('Could not generate image from canvas');
-            btn.disabled = false;
-            btn.textContent = originalText;
+        // Debug: Log configuration (remove in production)
+        console.log('EmailJS Config:', emailjsConfig);
+        console.log('Canvas size:', canvas.width, 'x', canvas.height);
+        console.log('Base64 data length:', base64Data.length);
+        
+        // Check if EmailJS is loaded
+        if (typeof emailjs === 'undefined') {
+            alert('Email service not available. Please add EmailJS script to your HTML:\n<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>');
+            resetEmailButton();
             return;
         }
-
-        const file = new File([blob], 'symptom-pattern.png', { type: 'image/png' });
-
-        // Fill the form fields
-        const emailInput = document.getElementById('user-email');
-        const fileInput = document.getElementById('canvas-file');
-        emailInput.value = email;
-
-        // Create DataTransfer to simulate file upload
-        const dt = new DataTransfer();
-        dt.items.add(file);
-        fileInput.files = dt.files;
-
-        // Submit form
-        document.getElementById('email-form').submit();
-
-        // Reset UI
-        setTimeout(() => {
-            btn.disabled = false;
-            btn.textContent = originalText;
-            alert(`✅ Image sent to ${email}`);
-        }, 2000);
-    }, 'image/png');
+        
+        // Check if configuration is set
+        if (emailjsConfig.serviceID === 'YOUR_SERVICE_ID' || 
+            emailjsConfig.templateID === 'YOUR_TEMPLATE_ID' || 
+            emailjsConfig.userID === 'YOUR_USER_ID') {
+            alert('⚠️ EmailJS not configured yet!\n\nPlease:\n1. Sign up at emailjs.com\n2. Create a service and template\n3. Replace YOUR_SERVICE_ID, YOUR_TEMPLATE_ID, and YOUR_USER_ID in the code');
+            resetEmailButton();
+            return;
+        }
+        
+        // Limit base64 size (EmailJS has limits)
+        // if (base64Data.length > 1000000) { // ~1MB limit
+        //     alert('⚠️ Image too large for email. Try regenerating with fewer symptoms or contact support.');
+        //     resetEmailButton();
+        //     return;
+        // }
+        
+        // Email template parameters - THESE MUST MATCH YOUR EMAILJS TEMPLATE VARIABLES
+        const templateParams = {
+            to_email: emailAddress,
+            to_name: emailAddress.split('@')[0],
+            from_name: 'Symptom Pattern Generator',
+            subject: 'Your Symptom Pattern',
+            message: 'Here is your personalized symptom pattern generated from our assessment tool.',
+            // Note: Most EmailJS templates don't support base64 attachments
+            // You might need to send the image URL instead or use a different approach
+        };
+        
+        console.log('Template params:', templateParams);
+        
+        // Initialize EmailJS (if not already done)
+        try {
+            emailjs.init(emailjsConfig.userID);
+        } catch (initError) {
+            console.error('EmailJS init error:', initError);
+        }
+        
+        // Send email using EmailJS
+        emailjs.send(emailjsConfig.serviceID, emailjsConfig.templateID, templateParams)
+            .then(function(response) {
+                console.log('Email sent successfully!', response.status, response.text);
+                alert(`Pattern sent successfully to ${emailAddress}!`);
+                resetEmailButton();
+            })
+            .catch(function(error) {
+                console.error('Failed to send email:', error);
+                console.error('Error details:', error.text || error.message);
+                
+                // More specific error messages
+                let errorMessage = '❌ Failed to send email. ';
+                if (error.status === 400) {
+                    errorMessage += 'Configuration error - please check your EmailJS setup.';
+                } else if (error.status === 401) {
+                    errorMessage += 'Authentication failed - check your User ID.';
+                } else if (error.status === 404) {
+                    errorMessage += 'Service or template not found - check your IDs.';
+                } else {
+                    errorMessage += 'Please try again or download the image manually.';
+                }
+                
+                alert(errorMessage);
+                resetEmailButton();
+                
+                // Offer download as fallback (but avoid window.confirm in inactive tab)
+                setTimeout(() => {
+                    if (document.hasFocus()) {
+                        const shouldDownload = confirm('Would you like to download the image instead?');
+                        if (shouldDownload) {
+                            downloadImage();
+                        }
+                    } else {
+                        // Auto-download if tab is not active
+                        console.log('Auto-downloading due to inactive tab');
+                        downloadImage();
+                    }
+                }, 100);
+            });
+        
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'symptom-pattern.png';
+            link.href = dataURL;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        function resetEmailButton() {
+            document.getElementById('email-btn').textContent = originalText;
+            document.getElementById('email-btn').disabled = false;
+        }
+        
+    } else {
+        alert('Canvas not ready for email');
+    }
 });
 
-// Add this new function to create a tiny version of the canvas
-function createTinyCanvas() {
-    const tinyCanvas = document.createElement('canvas');
-    tinyCanvas.width = 10;
-    tinyCanvas.height = 10;
-    const ctx = tinyCanvas.getContext('2d');
-    
-    // Fill with white background
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, 10, 10);
-    
-    // Create a simplified representation of the active symptoms
-    // Each active symptom gets a colored pixel
-    let pixelIndex = 0;
-    const colors = ['#FF0000', '#0000FF', '#00FF00', '#000000', '#FFA500', '#800080', '#C0C0C0'];
-    
-    for (let i = 0; i < activeSymptoms.length && pixelIndex < 100; i++) {
-        const symptom = activeSymptoms[i];
-        const variant = symptomVariants[symptom];
-        
-        if (variant > 0) {
-            // Calculate pixel position (row, col)
-            const row = Math.floor(pixelIndex / 10);
-            const col = pixelIndex % 10;
-            
-            // Use different colors based on variant level
-            const colorIndex = Math.min(variant - 1, colors.length - 1);
-            ctx.fillStyle = colors[colorIndex];
-            ctx.fillRect(col, row, 1, 1);
-            
-            pixelIndex++;
-        }
-    }
-    
-    return tinyCanvas;
-}
 
 // Alternative version that creates an even smaller data representation
 function createMicroCanvas() {
