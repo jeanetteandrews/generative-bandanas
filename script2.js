@@ -331,6 +331,89 @@ document.getElementById('download-btn').addEventListener('click', () => {
     }
 });
 
+document.getElementById('print-btn').addEventListener('click', () => {
+    if (p5Instance) {
+        // Get the canvas and convert to data URL
+        const canvas = p5Instance.canvas;
+        const dataURL = canvas.toDataURL('image/png');
+        
+        // Create a hidden iframe for printing
+        const printFrame = document.createElement('iframe');
+        printFrame.style.position = 'absolute';
+        printFrame.style.top = '-1000px';
+        printFrame.style.left = '-1000px';
+        printFrame.style.width = '0';
+        printFrame.style.height = '0';
+        printFrame.style.border = 'none';
+        
+        document.body.appendChild(printFrame);
+        
+        // Write the canvas image to the iframe
+        const frameDoc = printFrame.contentWindow.document;
+        frameDoc.write(`
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <title>Symptom Pattern</title>
+                    <style>
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
+                        body {
+                            background: white;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            min-height: 100vh;
+                        }
+                        img {
+                            max-width: 100%;
+                            max-height: 100%;
+                            object-fit: contain;
+                        }
+                        @media print {
+                            body {
+                                margin: 0;
+                                padding: 0;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                min-height: 100vh;
+                            }
+                            img {
+                                width: 100%;
+                                height: 100vh;
+                                object-fit: contain;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <img src="${dataURL}" alt="Symptom Pattern" />
+                </body>
+            </html>
+        `);
+        frameDoc.close();
+        
+        // Wait for the image to load, then print
+        const img = frameDoc.querySelector('img');
+        img.onload = function() {
+            printFrame.contentWindow.focus();
+            printFrame.contentWindow.print();
+            
+            // Remove the iframe after a short delay
+            setTimeout(() => {
+                document.body.removeChild(printFrame);
+            }, 1000);
+        };
+        
+    } else {
+        alert('Canvas not ready for printing');
+    }
+});
+
 document.getElementById('email-btn').addEventListener('click', () => {
     if (p5Instance) {
         // Get user's email input
