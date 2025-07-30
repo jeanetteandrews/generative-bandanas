@@ -80,7 +80,7 @@ initializeMainInterface();
 function calculateDistribution(numActiveSymptoms) {
     if (numActiveSymptoms === 0) return [];
     
-    const totalIcons = 26;
+    const totalIcons = 13;
     const baseAmount = Math.floor(totalIcons / numActiveSymptoms);
     const remainder = totalIcons % numActiveSymptoms;
     
@@ -590,9 +590,9 @@ function startP5Sketch() {
         };
 
         p.setup = function() {
-            let canvas = p.createCanvas(3800, 3800);
+            let canvas = p.createCanvas(3600, 3600);
             let pixels = p.pixelDensity();
-            pixels = 4;
+            pixels = 10;
             console.log(`pixel density: ${pixels}`);
             // let canvas = p.createCanvas(3000, 3000);
             canvas.parent('sketch-holder');
@@ -642,7 +642,7 @@ function generateRandomIcons(p) {
     if (userSelectedSymptoms.length === 0) return;
     
     iconPositions = [];
-    let numIcons = 16;
+    let numIcons = 13;
     let maxAttempts = 200; // Increased attempts
     // let possibleSymmetries = [1, 1, 2, 2, 2, 4, 4, 4, 6, 6, 8, 10];
     let possibleSymmetries = [1, 2, 4, 6, 8, 10, 2, 4, 6, 8, 10]
@@ -664,43 +664,27 @@ function generateRandomIcons(p) {
                     y = 0;
                     break;
                 case 2: // Red
-                    x = p.random(0, 3000 /2);
+                    x = p.random(0, 2900 /2);
                     x = Math.max(0, x); 
-                    y = p.random(0, 3000 /2);
+                    y = p.random(0, 2900 /2);
                     y = Math.max(0, y);
                     break;
                 case 4: // Blue
-                    x = p.random(0, 3000 /2);
-                    y = p.random(x, 3000 /2);
+                    x = p.random(0, 2900 /2);
+                    y = p.random(x, 2900 /2);
                     break;
                 case 6: // Green
-                    x = p.random(0, 3000 / 6 - 100);
-                    y = p.random(x, 3000 /2);
-                    // ymin = 100;
-                    // ymax = 3 * x - 200;
-                    // if (ymin > ymax) [ymin, ymax] = [ymax, ymin]; // flip if needed
-                    // y = p.random(ymin, ymax);
+                    x = p.random(100, 2600 / 6 - 100);
+                    y = p.random(x, 2600 /2);
                     break;
                 case 8: // Black
-                    x = p.random(100,  3000 / 8 - 100);
-                    y = p.random(x+200, 3000 /2);
-                    // ymin = 400;
-                    // ymax = 4 * x - 200;
-                    // if (ymin > ymax) [ymin, ymax] = [ymax, ymin]; // flip if needed
-                    // y = p.random(ymin, ymax);
+                    x = p.random(100,  2400 / 8 - 100);
+                    y = p.random(x+200, 2400 /2);
                     break;
                 case 10: // Orange
-                    x = p.random(0, 3100 / 10 - 200);
-                    y = p.random(x+200, 3100 /2);
-                    // ymin = 400;
-                    // ymax = 5 * (x - 200);
-                    // if (ymin > ymax) [ymin, ymax] = [ymax, ymin]; // flip if needed
-                    // y = p.random(ymin, ymax);
+                    x = p.random(200, 2400 / 10 - 200);
+                    y = p.random(x+300, 2400 /2);
                     break;
-                // case 12: // Purple
-                //     x = p.random(200, 3100 / 12 - 300);
-                //     y = p.random(x+200, 3100 /2);
-                //     break;
             }
             
             let randomSymptom = p.random(userSelectedSymptoms);
