@@ -1,7 +1,7 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
-const sharp = require("sharp");
+const { PDFDocument } = require("pdf-lib");
 const printer = require("pdf-to-printer");
 const readline = require("readline");
 
@@ -11,13 +11,43 @@ app.use(express.json({ limit: "100mb" }));
 
 let selectedPrinter = null;
 
-// Step 1: Prompt user to choose a printer
+// Function to convert PNG to PDF using pdf-lib
+async function pngToPdf(pngPath, pdfPath) {
+  const pngImageBytes = fs.readFileSync(pngPath);
+  const pdfDoc = await PDFDocument.create();
+  const pngImage = await pdfDoc.embedPng(pngImageBytes);
+
+  // Letter size in points
+  const pageWidth = 612;  // 8.5 in * 72
+  const pageHeight = 792; // 11 in * 72
+  const page = pdfDoc.addPage([pageWidth, pageHeight]);
+
+  // Target print size: 4x6 inches = 288 x 432 pts
+  const imageWidth = 288;
+  const imageHeight = 432;
+
+  const x = (pageWidth - imageWidth) / 2;
+  const y = (pageHeight - imageHeight) / 2;
+
+  page.drawImage(pngImage, {
+    x,
+    y,
+    width: imageWidth,
+    height: imageHeight,
+  });
+
+  const pdfBytes = await pdfDoc.save();
+  fs.writeFileSync(pdfPath, pdfBytes);
+}
+
+
+// Ask user to select printer on server start
 async function selectPrinter() {
   try {
     const printers = await printer.getPrinters();
 
     if (!printers || printers.length === 0) {
-      console.log("No printers found.");
+      console.log("No printers found. Exiting.");
       process.exit(1);
     }
 
@@ -35,7 +65,7 @@ async function selectPrinter() {
       const index = parseInt(answer.trim()) - 1;
 
       if (isNaN(index) || index < 0 || index >= printers.length) {
-        console.log("Invalid selection.");
+        console.log("Invalid selection. Exiting.");
         process.exit(1);
       }
 
@@ -43,7 +73,6 @@ async function selectPrinter() {
       console.log(`Selected printer: ${selectedPrinter}`);
       rl.close();
 
-      // Now start the server
       startServer();
     });
   } catch (err) {
@@ -52,7 +81,7 @@ async function selectPrinter() {
   }
 }
 
-// Step 2: Start Express server
+// Start Express server and setup print route
 function startServer() {
   app.post("/print", async (req, res) => {
     const base64Data = req.body.image.replace(/^data:image\/png;base64,/, "");
@@ -60,16 +89,13 @@ function startServer() {
     const outputPdfPath = path.join(__dirname, "output.pdf");
 
     try {
-      // Save image
+      // Save PNG image file
       fs.writeFileSync(outputPngPath, base64Data, "base64");
 
-      // Convert to A6 PDF (approx. 105mm × 148mm → 298 x 420 pts)
-      await sharp(outputPngPath)
-        .withMetadata()
-        .pdf({ page: { width: 298, height: 420 } })
-        .toFile(outputPdfPath);
+      // Convert PNG to PDF
+      await pngToPdf(outputPngPath, outputPdfPath);
 
-      // Print using the selected printer
+      // Send PDF to printer
       await printer.print(outputPdfPath, { printer: selectedPrinter });
 
       res.send("Printed");
@@ -80,9 +106,9 @@ function startServer() {
   });
 
   app.listen(3000, () => {
-    console.log(`\nServer running at http://localhost:3000`);
+    console.log("Server running at http://localhost:3000");
   });
 }
 
-// Step 3: Kick it off
+// Start by asking user to pick a printer
 selectPrinter();
