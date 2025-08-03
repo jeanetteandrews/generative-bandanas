@@ -645,7 +645,7 @@ function generateRandomIcons(p) {
     let numIcons = 13;
     let maxAttempts = 200; // Increased attempts
     // let possibleSymmetries = [1, 1, 2, 2, 2, 4, 4, 4, 6, 6, 8, 10];
-    let possibleSymmetries = [1, 2, 4, 6, 8, 10, 2, 4, 6, 8, 10]
+    let possibleSymmetries = [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 8, 10, 2, 4, 6, 8, 10]
     
     for (let i = 0; i < numIcons; i++) {
         let placed = false;
