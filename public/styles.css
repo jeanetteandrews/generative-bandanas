@@ -66,7 +66,7 @@ button {
 /* Canvas container */
 #sketch-holder {
   margin: 1rem;
-  width: 93%;
+  width: 100%;
   flex: 1;
   aspect-ratio: 1 / 1;
   background: white;
@@ -88,9 +88,10 @@ button {
   grid-template-columns: repeat(5, 1fr);
   grid-template-rows: repeat(3, 1fr);
   height: 100%;
-  gap: 0.4rem;
+  width: 100%;
+  gap: 0.8rem;
   margin: 1rem;
-  margin-top: 0;
+  margin-top: 1rem;
 }
 
 .symptom-control {
@@ -99,7 +100,7 @@ button {
   background: white;
   transition: background-color 0.2s, color 0.2s;
   font-family: inherit;
-  font-size: 0.55rem;
+  font-size: 1.5rem;
   letter-spacing: 0;
   position: relative;
   width: 100%;
@@ -108,7 +109,7 @@ button {
 
 .symptom-label {
   background: white;
-  border: 1px solid #000;
+  border: 0.09rem solid #000;
   font-weight: bold;
   cursor: pointer;
   padding: .75em 0;
@@ -122,7 +123,7 @@ button {
   transition: background-color 0.2s, color 0.2s;
   width: 100%;
   box-sizing: border-box;
-  font-size: 0.55rem;
+  font-size: 1.5rem;
   margin-bottom: 0.4rem;
 }
 
@@ -148,7 +149,7 @@ button {
   grid-column: 1 / span 2;
   grid-row: 3;
   z-index: 1;
-  font-size: 0.55rem;
+  font-size: 1.5rem;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -161,24 +162,24 @@ button {
   line-height: normal;
 }
 
-/* Action buttons */
+/********** Action buttons ***********/
 #action-buttons-row {
   padding: 0rem;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  gap: 0.65rem;
-  width: 93%;
+  gap: 0.8rem;
+  width: 100%;
   box-sizing: border-box;
   text-decoration: underline;
-  margin-top: 0.4rem;
+  margin-top: 1rem;
 }
 
 #action-buttons-row button {
   background: white;
   border: 0.09rem solid #000;
   font-family: inherit;
-  font-size: 0.7rem;
+  font-size: 1.5rem;
   font-weight: bold;
   letter-spacing: 0.05rem;
   cursor: pointer;
@@ -251,11 +252,11 @@ input[type="range"]::-moz-range-track,
   border-radius: 3px;
 }
 
-/* Color Selection Section */
+/*************** Color Selection Section *************/
 #color-selection {
-  width: 93%;
-  margin: 1rem;
-  margin-top: 0rem;
+  width: 100%;
+  /* margin: 1rem; */
+  margin-top: 1rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -265,14 +266,14 @@ input[type="range"]::-moz-range-track,
   display: flex;
   gap: 0.8rem;
   justify-content: center;
-  margin-bottom: -0.5rem;
+  /* margin-bottom: -0.5rem; */
 }
 
 .color-type-btn {
   background: white;
   border: 0.09rem solid #000;
   font-family: inherit;
-  font-size: 0.6rem;
+  font-size: 1.5rem;
   font-weight: bold;
   letter-spacing: 0.05rem;
   cursor: pointer;
@@ -290,16 +291,20 @@ input[type="range"]::-moz-range-track,
 
 #color-palette {
   display: flex;
-  gap: 0.7rem;
-  justify-content: center;
-  flex-wrap: nowrap;
-  overflow-x: auto;
+  gap: 1rem;
+  justify-content: center;       /* align items to start */
+  flex-wrap: nowrap;                 /* force one line */
+  overflow-x: auto;                  /* scroll horizontally if needed */
   overflow-y: hidden;
+
+  width: 100%;                       /* stretch full width */
+  padding: 0;                  /* optional: side padding */
+  box-sizing: border-box;
 }
 
 .color-option {
-  width: 1.6rem;
-  height: 1.6rem;
+  width: 4rem;
+  height: 4rem;
   cursor: pointer;
   border: 0.2rem solid white;
   outline: 0.08rem solid white;
