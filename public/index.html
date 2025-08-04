@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Symptom Pattern Generator</title>
+  <title>Pattern Generator</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <link rel="icon" type="image/svg+xml" href="symptoms/Nightmares7.svg" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -13,8 +14,28 @@
     <div class="aspect-box">
       <div id="main-interface">
         <div id="sketch-holder"></div>
+        <p style="display:none;" id="p5_loading"></p>
         <div id="controls"><div id="added-label">Added: </div></div>
         
+        <div id="color-selection">
+          <div id="color-type-buttons">
+            <button class="color-type-btn" id="pattern-color-btn">PATTERN COLOR</button>
+            <button class="color-type-btn" id="border-color-btn">BORDER COLOR</button>
+            <button class="color-type-btn" id="background-color-btn">BACKGROUND COLOR</button>
+          </div>
+          <div id="color-palette">
+            <div class="color-option" data-color="#020202" style="background-color: #020202;"></div>
+            <div class="color-option" data-color="#fffcef" style="background-color: #fffcef;"></div>
+            <div class="color-option" data-color="#573f33" style="background-color: #573f33;"></div>
+            <div class="color-option" data-color="#0a1849" style="background-color: #0a1849;"></div>
+            <div class="color-option" data-color="#b7d1e6" style="background-color: #b7d1e6;"></div>
+            <div class="color-option" data-color="#771026" style="background-color: #771026;"></div>
+            <div class="color-option" data-color="#f7e7bc" style="background-color: #f7e7bc;"></div>
+            <div class="color-option" data-color="#a8ae28" style="background-color: #a8ae28;"></div>
+            <div class="color-option" data-color="#f9922d" style="background-color: #f9922d;"></div>
+            <div class="color-option" data-color="#c8a2c8" style="background-color: #c8a2c8;"></div>
+          </div>
+        </div>
 
         <div id="action-buttons-row">
           <button id="print-btn">PRINT</button>
