@@ -713,7 +713,7 @@ function updateAddedLabel() {
             const img = document.createElement("img");
             img.src = `variants/${symptom}.svg`;
             img.alt = `${symptom} icon`;
-            img.style.height = "1em";
+            img.style.height = "0.85em";
             img.style.width = "auto";
             img.style.verticalAlign = "middle";
 
