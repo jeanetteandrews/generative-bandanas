@@ -101,7 +101,7 @@ function generateRandomIcons(p) {
                     break;
                 case 6:
                     x = p.random(100, 2600 / 6 - 100);
-                    y = p.random(x, 2600 /2);
+                    y = p.random(x+100, 2600 /2);
                     break;
                 case 8:
                     x = p.random(100,  2400 / 8 - 100);
@@ -114,9 +114,13 @@ function generateRandomIcons(p) {
             }
             
             let randomSymptom = p.random(userSelectedSymptoms);
-            let iconSize = p.random(190, 290);
             
-            let snapDistance = iconSize / 2;
+            let iconHeight= p.random(220, 290);
+            let iconWidth = 0; // This will maintain aspect ratio
+
+            let estimatedSize = iconHeight; // Use width as reference for collision detection
+            
+            let snapDistance = estimatedSize / 2;
             let snappedToDiagonal = false;
             
             if (iconSymmetry === 2) {
@@ -161,7 +165,7 @@ function generateRandomIcons(p) {
                 for (let newPos of newIconPositions) {
                     for (let existingPos of existingPositions) {
                         let distance = p.dist(newPos.x, newPos.y, existingPos.x, existingPos.y);
-                        let minDistance = (iconSize + existing.size) / 2 - 20;
+                        let minDistance = (estimatedSize + existing.size) / 2;
                         
                         if (distance < minDistance) {
                             collision = true;
@@ -178,7 +182,9 @@ function generateRandomIcons(p) {
                     x: x,
                     y: y,
                     symptom: randomSymptom,
-                    size: iconSize,
+                    width: iconWidth,
+                    height: iconHeight,
+                    size: estimatedSize, // Keep for collision detection
                     symmetry: iconSymmetry,
                     angle: iconAngle,
                     snappedToDiagonal: snappedToDiagonal
@@ -199,12 +205,14 @@ function generateRandomIcons(p) {
                 let y = p.random(-p.height/2 + 100, p.height/2 - 100);
                 
                 let randomSymptom = p.random(userSelectedSymptoms);
-                let fallbackSize = 170;
+                let fallbackWidth = 0;
+                let fallbackHeight = 190;
+                let fallbackSize = 190;
                 
                 let collision = false;
                 for (let existing of iconPositions) {
                     let distance = p.dist(x, y, existing.x, existing.y);
-                    let minDistance = (fallbackSize + existing.size) / 2 - 20;
+                    let minDistance = (fallbackSize + existing.size) / 2;
                     
                     if (distance < minDistance) {
                         collision = true;
@@ -217,6 +225,8 @@ function generateRandomIcons(p) {
                         x: x,
                         y: y,
                         symptom: randomSymptom,
+                        width: fallbackWidth,
+                        height: fallbackHeight,
                         size: fallbackSize,
                         symmetry: iconSymmetry,
                         angle: iconAngle,
@@ -234,6 +244,8 @@ function generateRandomIcons(p) {
                 x: p.random(-p.width/2 + 100, p.width/2 - 100),
                 y: p.random(-p.height/2 + 100, p.height/2 - 100),
                 symptom: p.random(userSelectedSymptoms),
+                width: 100,
+                height: 0,
                 size: 100,
                 symmetry: p.random(possibleSymmetries),
                 angle: 360 / p.random(possibleSymmetries),
@@ -285,8 +297,13 @@ function generateSymmetricalPositions(x, y, symmetry, angle, p) {
 }
 
 function drawPattern(p) {
+    // Get the mapped colors for canvas rendering
+    const canvasBackgroundColor = getCanvasColor(currentColors.background, 'background');
+    const canvasBorderColor = getCanvasColor(currentColors.border, 'border');
+    const canvasPatternColor = getCanvasColor(currentColors.pattern, 'pattern');
+
     // Set background color
-    let bgColor = p.color(currentColors.background);
+    let bgColor = p.color(canvasBackgroundColor);
     p.background(bgColor);
     p.translate(p.width / 2, p.height / 2);
     
@@ -303,13 +320,21 @@ function drawPattern(p) {
         let img = icons[iconData.symptom] && icons[iconData.symptom][currentLevel];
         
         if (img) {
+            // Create a resized copy to maintain aspect ratio
+            let resizedImg = img.get(); // Create a copy
+            resizedImg.resize(iconData.width, iconData.height); // Resize with aspect ratio
+            
+            // Get actual dimensions after resize for centering
+            let actualWidth = resizedImg.width;
+            let actualHeight = resizedImg.height;
+            
             p.tint(patternColor);
             p.push();
 
             if (iconData.symmetry === 1) {
                 p.push();
                 p.translate(iconData.x, iconData.y);
-                p.image(img, -iconData.size/2, -iconData.size/2, iconData.size, iconData.size);
+                p.image(resizedImg, -actualWidth/2, -actualHeight/2);
                 p.pop();
             } else {
                 const isOnYAxis = (iconData.x === 0);
@@ -319,7 +344,7 @@ function drawPattern(p) {
                 for (let i = 0; i < iconData.symmetry; i++) {
                     p.push();
                     p.translate(iconData.x, iconData.y);
-                    p.image(img, -iconData.size/2, -iconData.size/2, iconData.size, iconData.size);
+                    p.image(resizedImg, -actualWidth/2, -actualHeight/2);
                     p.pop();
                     
                     let shouldMirror = true;
@@ -338,7 +363,7 @@ function drawPattern(p) {
                         p.push();
                         p.scale(1, -1);
                         p.translate(iconData.x, iconData.y);
-                        p.image(img, -iconData.size/2, -iconData.size/2, iconData.size, iconData.size);
+                        p.image(resizedImg, -actualWidth/2, -actualHeight/2);
                         p.pop();
                     }
                     
@@ -350,8 +375,8 @@ function drawPattern(p) {
         }
     }
     
-    // Draw layered borders with selected color
-    const borderColor = p.color(currentColors.border);
+    // Draw layered borders with selected color (using mapped color)
+    const borderColor = p.color(canvasBorderColor);
     const borders = [
         { thickness: 224, color: borderColor },
         { thickness: 204, color: bgColor },
@@ -460,6 +485,141 @@ function initializeMainInterface() {
 }
 
 
+
+const colorMapping = {
+    '#020202': '#272727',
+    '#fffcef': '#f0e9c9',
+    '#573f33': '#b7a69f',
+    '#0a1849': '#1d3da2',
+    '#b7d1e6': '#88bde6',
+    '#771026': '#56021c',
+    '#f7e7bc': '#efe0a0',
+    '#a8ae28': '#626520',
+    '#f9922d': '#bc6b26',
+    '#c8a2c8': '#ba91c9'
+};
+
+// Function to get the actual color to use on canvas
+function getCanvasColor(selectedColor, elementType, backgroundColorForComparison = null) {
+    // Border and background always use original colors
+    if (elementType === 'background' || elementType === 'border') {
+        return selectedColor;
+    }
+    
+    // Pattern logic: use original UNLESS background is already using the same original color
+    if (elementType === 'pattern') {
+        // If pattern color matches background color, switch pattern to mapped version
+        if (selectedColor === backgroundColorForComparison) {
+            return colorMapping[selectedColor] || selectedColor;
+        }
+        // Otherwise use original color
+        return selectedColor;
+    }
+    
+    return selectedColor;
+}
+
+// Updated drawPattern function that uses color mapping
+function drawPattern(p) {
+    // Get the colors using the new logic
+    const canvasBackgroundColor = getCanvasColor(currentColors.background, 'background');
+    const canvasBorderColor = getCanvasColor(currentColors.border, 'border');
+    const canvasPatternColor = getCanvasColor(currentColors.pattern, 'pattern', currentColors.background);
+    
+    // Set background color (always original)
+    let bgColor = p.color(canvasBackgroundColor);
+    p.background(bgColor);
+    p.translate(p.width / 2, p.height / 2);
+    
+    // Set pattern color tint (original unless it matches background, then mapped)
+    let patternColor = p.color(canvasPatternColor);
+    
+    for (let iconData of iconPositions) {
+        let currentLevel = symptomVariants[iconData.symptom] || 0;
+        
+        if (currentLevel === 0) {
+            continue;
+        }
+        
+        let img = icons[iconData.symptom] && icons[iconData.symptom][currentLevel];
+        
+        if (img) {
+            // Create a resized copy to maintain aspect ratio
+            let resizedImg = img.get(); // Create a copy
+            resizedImg.resize(iconData.width, iconData.height); // Resize with aspect ratio
+            
+            // Get actual dimensions after resize for centering
+            let actualWidth = resizedImg.width;
+            let actualHeight = resizedImg.height;
+            
+            p.tint(patternColor);
+            p.push();
+
+            if (iconData.symmetry === 1) {
+                p.push();
+                p.translate(iconData.x, iconData.y);
+                p.image(resizedImg, -actualWidth/2, -actualHeight/2);
+                p.pop();
+            } else {
+                const isOnYAxis = (iconData.x === 0);
+                const isOnXAxis = (iconData.y === 0);
+                const isOnDiagonal = (Math.abs(iconData.y - iconData.x) < 1);
+                
+                for (let i = 0; i < iconData.symmetry; i++) {
+                    p.push();
+                    p.translate(iconData.x, iconData.y);
+                    p.image(resizedImg, -actualWidth/2, -actualHeight/2);
+                    p.pop();
+                    
+                    let shouldMirror = true;
+                    
+                    if (iconData.symmetry === 2) {
+                        if (isOnXAxis || isOnYAxis) {
+                            shouldMirror = false;
+                        }
+                    } else if (iconData.symmetry === 4) {
+                        if (isOnXAxis || isOnYAxis || isOnDiagonal) {
+                            shouldMirror = false;
+                        }
+                    }
+                    
+                    if (shouldMirror) {
+                        p.push();
+                        p.scale(1, -1);
+                        p.translate(iconData.x, iconData.y);
+                        p.image(resizedImg, -actualWidth/2, -actualHeight/2);
+                        p.pop();
+                    }
+                    
+                    p.rotate(iconData.angle);
+                }
+            }
+            p.pop();
+            p.noTint();
+        }
+    }
+    
+    // Draw layered borders with selected color (always original)
+    const borderColor = p.color(canvasBorderColor);
+    const borders = [
+        { thickness: 224, color: borderColor },
+        { thickness: 204, color: bgColor },
+        { thickness: 160, color: borderColor },
+        { thickness: 148, color: bgColor },
+        { thickness: 104, color: borderColor }
+    ];
+
+    for (let { thickness, color } of borders) {
+        p.push();
+        p.resetMatrix();
+        p.stroke(color);
+        p.strokeWeight(thickness);
+        p.noFill();
+        p.rect(thickness / 2, thickness / 2, p.width - thickness, p.height - thickness);
+        p.pop();
+    }
+}
+
 function initializeColorSelection() {
     // Color type button handlers
     document.getElementById('pattern-color-btn').addEventListener('click', () => {
@@ -487,9 +647,7 @@ function initializeColorSelection() {
             }
         });
     });
-    
-    // Initialize with pattern color selected
-    setActiveColorType('pattern');
+    setActiveColorType('background');
 }
 
 function setActiveColorType(type) {
@@ -800,4 +958,26 @@ document.getElementById("print-btn").addEventListener("click", async () => {
     } catch (err) {
         console.error("Error printing:", err);
     }
+});
+
+function openFullscreen() {
+  const elem = document.documentElement;
+
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) {
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) {
+    elem.msRequestFullscreen();
+  }
+}
+
+document.getElementById("start-screen").addEventListener("click", () => {
+  openFullscreen();
+
+  // Hide the overlay
+  document.getElementById("start-screen").style.display = "none";
+
+  // Optional: center .fixed-ratio-wrapper again
+  document.getElementById("main-interface").style.display = "flex";
 });
