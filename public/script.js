@@ -308,7 +308,7 @@ function drawPattern(p) {
     p.translate(p.width / 2, p.height / 2);
     
     // Set pattern color tint
-    let patternColor = p.color(currentColors.pattern);
+    let patternColor = p.color(canvasPatternColor);
     
     for (let iconData of iconPositions) {
         let currentLevel = symptomVariants[iconData.symptom] || 0;
@@ -924,6 +924,16 @@ document.getElementById('restart-btn').addEventListener('click', () => {
             iconPositions[i].symptom = null;
         }
     }
+
+    // Reset colors to defaults
+    currentColors = {
+        pattern: '#020202',    // black
+        border: '#020202',     // black  
+        background: '#fffcef'  // white
+    };
+
+    // Update the color selection UI to reflect the reset
+    updateColorSelection();
     
     updateAddedLabel();
     
