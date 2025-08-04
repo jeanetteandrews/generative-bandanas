@@ -163,7 +163,7 @@ button {
 
 /********** Action buttons ***********/
 #action-buttons-row {
-  padding: 0rem;
+  padding: .75em;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(2, 1fr);
@@ -187,7 +187,7 @@ button {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 0.65rem;
+  padding: .75em;
 }
 
 #action-buttons-row button:hover {
@@ -277,7 +277,7 @@ input[type="range"]::-moz-range-track,
   letter-spacing: 0.05rem;
   cursor: pointer;
   transition: background-color 0.2s, color 0.2s;
-  padding: 0.5rem;
+  padding: .75em;
   flex: 1;
   text-align: center;
 }
