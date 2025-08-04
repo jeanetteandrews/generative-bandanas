@@ -11,10 +11,15 @@ html, body {
   padding: 0;
   height: 100%;
   background: white;
+  display: flex;
   justify-content: center;
   align-items: center;
   font-family: 'Phase', 'Helvetica', 'Arial', sans-serif;
-  /* letter-spacing: 0.05rem; */
+}
+
+button {
+  color: black;
+  font-family: inherit;
 }
 
 /* Wrapper with fixed aspect ratio container */
@@ -41,8 +46,8 @@ html, body {
   margin: 1rem;
   width: 93%;
   flex: 1;
-  aspect-ratio: 1 / 1; /* Or whatever your canvas uses */
-  background: white;    /* Optional: placeholder background */
+  aspect-ratio: 1 / 1;
+  background: white;
 }
 
 #sketch-holder canvas {
@@ -51,178 +56,159 @@ html, body {
   display: block;
 }
 
-
 /* Controls Grid */
 #controls {
   position: relative;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(3, 1fr);  /* Three equal rows */
+  grid-template-rows: repeat(3, 1fr);
   height: 100%;
   gap: 0.45rem;
   margin: 1rem;
   margin-top: 0;
 }
 
-
-    .symptom-control {
-      display: flex;
-      flex-direction: column;
-      /* padding: 8px; */
-      background: white;
-      transition: background-color 0.2s, color 0.2s;
-      font-family: inherit;
-      font-size: 0.6rem;
-      letter-spacing: 0;
-      position: relative;
-      /* gap: 0.3rem; */
-    }
-
-    .symptom-control.active .symptom-label {
-      background: black;
-      color: white;
-    }
-
-    .symptom-label {
-      text-align: center;
-      /* margin-bottom: 8px;  */
-      user-select: none;
-      font-weight: bold;
-      /* min-height: 40px; */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      /* line-height: 1.2; */
-      border: .09rem solid #000;
-      /* gap: 0.2rem; */
-      margin-bottom: 0.4rem;
-      padding-top: .4rem;
-      padding-bottom: .4rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .slider-container {
-      display: flex;
-      align-items: center;
-      gap: 0.2rem;
-    }
-
-    .symptom-value {
-      font-weight: bold;
-      /* min-width: 15px; */
-      text-align: center;
-      user-select: none;
-    }
-
-#added-label {
-  position: static;           
-  grid-column: 1 / span 2;       
-  grid-row: 3;                  
-
-  z-index: 1;
-  font-size: 0.6rem;
-  /* line-height: 1.2; */
-
+.symptom-control {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: .01rem;
-  overflow-y: auto;
-  /* padding: 0.4rem; */
-  box-sizing: border-box;
-
-  
-  white-space: normal; 
+  flex-direction: column;
   background: white;
-
-  align-items: flex-start;
-  align-content: flex-start;
-
-  line-height: -1rem;
-  /* padding-right: -0.4rem; */
+  transition: background-color 0.2s, color 0.2s;
+  font-family: inherit;
+  font-size: 0.6rem;
+  letter-spacing: 0;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 
+.symptom-label {
+  background: white;
+  border: 1px solid #000;
+  font-weight: bold;
+  cursor: pointer;
+  padding: .7em 0;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 0.6rem;
+  margin-bottom: 0.4rem;
+}
 
+.symptom-control.active .symptom-label {
+  background: black;
+  color: white;
+}
 
-    /* Action buttons */
-     #action-buttons-row {
-      padding: 0rem;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(2, 1fr);
-      gap: .65rem;
-      width: 93%;
-      box-sizing: border-box;
-      /* height: 120px; */
-      text-decoration: underline;
-      /* margin: 1rem; */
-      margin-top: 0.4rem;
-    }
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
 
-    #action-buttons-row button {
-      background: white;
-      border: .09rem solid #000;
-      font-family: inherit;
-      font-size: 0.7rem;
-      font-weight: bold;
-      letter-spacing: 0.05rem;
-      cursor: pointer;
-      transition: background-color 0.2s, color 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: .65rem;
-    }
-    #action-buttons-row button:hover {
-      background: #000;
-      color: white;
-      text-decoration-color: white;
-    }
+.symptom-value {
+  font-weight: bold;
+  text-align: center;
+  user-select: none;
+}
 
-    #print-btn {
-      grid-column: 1;
-      grid-row: 1 / 3;
-    }
+#added-label {
+  position: static;
+  grid-column: 1 / span 2;
+  grid-row: 3;
+  z-index: 1;
+  font-size: 0.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  align-content: flex-start;
+  gap: 0.01rem;
+  overflow-y: auto;
+  box-sizing: border-box;
+  white-space: normal;
+  background: white;
+  line-height: normal;
+}
 
-    #regenerate-btn {
-      grid-column: 2;
-      grid-row: 1;
-    }
+/* Action buttons */
+#action-buttons-row {
+  padding: 0rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 0.65rem;
+  width: 93%;
+  box-sizing: border-box;
+  text-decoration: underline;
+  margin-top: 0.4rem;
+}
 
-    #restart-btn {
-      grid-column: 2;
-      grid-row: 2;
-    }
+#action-buttons-row button {
+  background: white;
+  border: 0.09rem solid #000;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: bold;
+  letter-spacing: 0.05rem;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.65rem;
+}
 
-    /* SLIDER TRACK */
+#action-buttons-row button:hover {
+  background: #000;
+  color: white;
+  text-decoration-color: white;
+}
+
+#print-btn {
+  grid-column: 1;
+  grid-row: 1 / 3;
+}
+
+#regenerate-btn {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+#restart-btn {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+/* SLIDER TRACK */
 input[type="range"],
 .symptom-slider {
   -webkit-appearance: none;
   appearance: none;
   width: 97%;
-  height: .07rem; /* slightly thicker track */
-  background: black; /* black track */
+  height: 0.07rem;
+  background: black;
   cursor: pointer;
 }
 
-/* CHROME / SAFARI THUMB */
 input[type="range"]::-webkit-slider-thumb,
 .symptom-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: .4rem;      /* large round thumb */
-  height: .4rem;
+  width: 0.4rem;
+  height: 0.4rem;
   background: black;
   border-radius: 50%;
-  margin-top: 0; /* centers the thumb vertically */
+  margin-top: 0;
   cursor: pointer;
-  /* transition: background 0.2s; */
 }
 
-/* FIREFOX THUMB */
 input[type="range"]::-moz-range-thumb,
 .symptom-slider::-moz-range-thumb {
   width: 28px;
@@ -231,10 +217,8 @@ input[type="range"]::-moz-range-thumb,
   border-radius: 50%;
   border: none;
   cursor: pointer;
-  /* transition: background 0.2s; */
 }
 
-/* FIREFOX TRACK */
 input[type="range"]::-moz-range-track,
 .symptom-slider::-moz-range-track {
   height: 6px;
@@ -245,14 +229,11 @@ input[type="range"]::-moz-range-track,
 /* Color Selection Section */
 #color-selection {
   width: 93%;
-  /* padding: 1rem; */
-  /* padding-bottom: 0; */
   margin: 1rem;
   margin-top: 0rem;
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
-  /* margin-top: 0rem; */
 }
 
 #color-type-buttons {
@@ -264,7 +245,7 @@ input[type="range"]::-moz-range-track,
 
 .color-type-btn {
   background: white;
-  border: .09rem solid #000;
+  border: 0.09rem solid #000;
   font-family: inherit;
   font-size: 0.6rem;
   font-weight: bold;
@@ -272,7 +253,6 @@ input[type="range"]::-moz-range-track,
   cursor: pointer;
   transition: background-color 0.2s, color 0.2s;
   padding: 0.5rem;
-  padding-top: -0.5rem;
   flex: 1;
   text-align: center;
 }
@@ -287,9 +267,8 @@ input[type="range"]::-moz-range-track,
   display: flex;
   gap: 0.7rem;
   justify-content: center;
-  /* flex-wrap: wrap; */
-  flex-wrap: nowrap;               /* ❗️forces one line */
-  overflow-x: auto;                /* adds horizontal scroll if needed */
+  flex-wrap: nowrap;
+  overflow-x: auto;
   overflow-y: hidden;
 }
 
@@ -297,13 +276,12 @@ input[type="range"]::-moz-range-track,
   width: 1.5rem;
   height: 1.5rem;
   cursor: pointer;
-  border: .2rem solid white;        /* Inner white border */
-  outline: .08rem solid white; 
-  padding-top: -1rem;
+  border: 0.2rem solid white;
+  outline: 0.08rem solid white;
 }
 
 .color-option.selected {
-  border: .2rem solid white;        /* Inner white border */
-  outline: .08rem solid black;       /* Outer black border */
-  outline-offset: -.08rem;  
+  border: 0.2rem solid white;
+  outline: 0.08rem solid black;
+  outline-offset: -0.08rem;
 }

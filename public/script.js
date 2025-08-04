@@ -374,12 +374,13 @@ function drawPattern(p) {
 // Initialize the main interface
 function initializeMainInterface() {
     const controlsDiv = document.getElementById("controls");
-    
+
     symptoms.forEach((symptom, index) => {
         const controlDiv = document.createElement("div");
         controlDiv.classList.add("symptom-control");
         controlDiv.id = `control-${symptom.replace(/\s+/g, '-')}`;
 
+        // Custom grid placement for last 3 symptoms
         if (index >= symptoms.length - 3) {
             const col = 3 + (index - (symptoms.length - 3));
             controlDiv.style.gridColumn = `${col}`;
@@ -390,11 +391,12 @@ function initializeMainInterface() {
             controlDiv.style.gridColumn = `${col}`;
             controlDiv.style.gridRow = `${row}`;
         }
-        
-        const label = document.createElement("div");
+
+        // Label as a button
+        const label = document.createElement("button");
         label.classList.add("symptom-label");
         label.textContent = symptomToHebrew[symptom] || symptom;
-        
+
         const slider = document.createElement("input");
         slider.type = "range";
         slider.min = "0";
@@ -402,35 +404,35 @@ function initializeMainInterface() {
         slider.value = "0";
         slider.classList.add("symptom-slider");
         slider.id = `slider-${symptom.replace(/\s+/g, '-')}`;
-        
+
         const valueDisplay = document.createElement("div");
         valueDisplay.classList.add("symptom-value");
         valueDisplay.textContent = "0";
         valueDisplay.id = `value-${symptom.replace(/\s+/g, '-')}`;
-        
+
         controlDiv.appendChild(label);
         controlDiv.appendChild(slider);
         controlDiv.appendChild(valueDisplay);
         controlsDiv.appendChild(controlDiv);
-        
+
         symptomVariants[symptom] = 0;
-        
+
+        // === Slider input logic ===
         slider.addEventListener("input", () => {
             const variant = parseInt(slider.value);
             const previousVariant = symptomVariants[symptom];
             symptomVariants[symptom] = variant;
-            
             valueDisplay.textContent = variant;
-            
+
             if (variant > 0) {
                 controlDiv.classList.add("active");
             } else {
                 controlDiv.classList.remove("active");
             }
-            
+
             const wasActive = previousVariant > 0;
             const isActive = variant > 0;
-            
+
             if (!wasActive && isActive) {
                 activeSymptoms.push(symptom);
                 updateSymptomPositions(symptom, null);
@@ -441,20 +443,22 @@ function initializeMainInterface() {
                     updateSymptomPositions(null, symptom);
                 }
             }
-            
+
             updateAddedLabel();
-            
-            if (p5Instance) {
-                p5Instance.redraw();
-            }
+            if (p5Instance) p5Instance.redraw();
+        });
+
+        // === Toggle slider on label click ===
+        label.addEventListener("click", () => {
+            slider.value = slider.value === "0" ? "1" : "0";
+            slider.dispatchEvent(new Event("input")); // Trigger slider logic
         });
     });
-    
-    // Initialize color selection
+
     initializeColorSelection();
-    
     startP5Sketch();
 }
+
 
 function initializeColorSelection() {
     // Color type button handlers
