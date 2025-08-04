@@ -9,22 +9,22 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="main-interface">
-    <div id="sketch-holder">
-    </div>
+  <div class="fixed-ratio-wrapper">
+    <div class="aspect-box">
+      <div id="main-interface">
+        <div id="sketch-holder"></div>
+        <div id="controls"><div id="added-label">Added: </div></div>
+        
 
-    <div id="controls" class="button-group"></div>
-    <div id="slider-download-row">
-      <div id="selected-label">Selected: </div>
-      <input id="variant-slider" type="range" min="0" max="7" value="0">
-    </div>
-     <div id="action-buttons-row">
-            <button id="regenerate-btn">Regenerate Pattern</button>
-            <button id="download-btn">Download</button>
-            <button id="print-btn">Print</button>
-            <button id="restart-btn">Restart</button>
+        <div id="action-buttons-row">
+          <button id="print-btn">PRINT</button>
+          <button id="regenerate-btn">REGENERATE</button>
+          <button id="restart-btn">RESTART</button>
         </div>
+      </div>
+    </div>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
