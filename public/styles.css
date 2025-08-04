@@ -66,7 +66,7 @@ button {
 /* Canvas container */
 #sketch-holder {
   margin: 1rem;
-  width: 100%;
+  width: 93%;
   flex: 1;
   aspect-ratio: 1 / 1;
   background: white;
@@ -88,7 +88,7 @@ button {
   grid-template-columns: repeat(5, 1fr);
   grid-template-rows: repeat(3, 1fr);
   height: 100%;
-  width: 100%;
+  width: 93%;
   gap: 0.8rem;
   margin: 1rem;
   margin-top: 1rem;
@@ -100,7 +100,7 @@ button {
   background: white;
   transition: background-color 0.2s, color 0.2s;
   font-family: inherit;
-  font-size: 1.5rem;
+  font-size: 1rem;
   letter-spacing: 0;
   position: relative;
   width: 100%;
@@ -110,7 +110,6 @@ button {
 .symptom-label {
   background: white;
   border: 0.09rem solid #000;
-  font-weight: bold;
   cursor: pointer;
   padding: .75em 0;
   text-align: center;
@@ -123,8 +122,8 @@ button {
   transition: background-color 0.2s, color 0.2s;
   width: 100%;
   box-sizing: border-box;
-  font-size: 1.5rem;
-  margin-bottom: 0.4rem;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .symptom-control.active .symptom-label {
@@ -149,7 +148,7 @@ button {
   grid-column: 1 / span 2;
   grid-row: 3;
   z-index: 1;
-  font-size: 1.5rem;
+  font-size: 1rem;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -169,17 +168,17 @@ button {
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(2, 1fr);
   gap: 0.8rem;
-  width: 100%;
+  width: 93%;
   box-sizing: border-box;
   text-decoration: underline;
-  margin-top: 1rem;
+  margin-top: 1.3rem;
 }
 
 #action-buttons-row button {
   background: white;
   border: 0.09rem solid #000;
   font-family: inherit;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: bold;
   letter-spacing: 0.05rem;
   cursor: pointer;
@@ -227,8 +226,8 @@ input[type="range"]::-webkit-slider-thumb,
 .symptom-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 0.4rem;
-  height: 0.4rem;
+  width: 0.5rem;
+  height: 0.5rem;
   background: black;
   border-radius: 50%;
   margin-top: 0;
@@ -237,24 +236,24 @@ input[type="range"]::-webkit-slider-thumb,
 
 input[type="range"]::-moz-range-thumb,
 .symptom-slider::-moz-range-thumb {
-  width: 28px;
-  height: 28px;
+  width: 0.5rem;
+  height: 0.5rem;
   background: black;
   border-radius: 50%;
   border: none;
   cursor: pointer;
+  margin-top: 0;
 }
 
 input[type="range"]::-moz-range-track,
 .symptom-slider::-moz-range-track {
-  height: 6px;
+  height: 0.07rem;
   background: black;
-  border-radius: 3px;
 }
 
 /*************** Color Selection Section *************/
 #color-selection {
-  width: 100%;
+  width: 93%;
   /* margin: 1rem; */
   margin-top: 1rem;
   display: flex;
@@ -273,7 +272,7 @@ input[type="range"]::-moz-range-track,
   background: white;
   border: 0.09rem solid #000;
   font-family: inherit;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: bold;
   letter-spacing: 0.05rem;
   cursor: pointer;
