@@ -48,6 +48,9 @@ button {
   flex: 1;
   aspect-ratio: 1 / 1;
   background: white;
+  flex: 1 0 auto;
+  min-height: 300px; /* fallback for mobile */
+  max-height: 100%;
 }
 
 #sketch-holder canvas {
