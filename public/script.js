@@ -736,8 +736,7 @@ function updateAddedLabel() {
 
     if (activeSymptomsList.length > 0) {
         const label = document.createElement("span");
-        label.textContent = "Added: ";
-        label.style.fontWeight = "bold";
+        label.textContent = "Added:";
         label.style.marginRight = "0.5em";
         addedLabel.appendChild(label);
 

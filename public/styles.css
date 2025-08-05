@@ -164,6 +164,8 @@ button {
   white-space: normal;
   background: white;
   line-height: normal;
+  font-family: 'David Libre', serif;
+  font-weight: 400;
 }
 
 /********** Action buttons ***********/
