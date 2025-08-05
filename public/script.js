@@ -9,26 +9,35 @@ let currentColors = {
 let activeColorType = null; // 'pattern', 'border', or 'background'
 
 const symptoms = [
-    "Angry Outbursts", "Avoidance", "Emotional Numbing", "Exaggerated Startle Response",
-    "Excessive Alertness", "Feeling Detached", "Flashbacks", "Intrusive Thoughts",
-    "Loss of Interest", "Nightmares", "Problems With Concentration", "Self Blame",
-    "Sleep Disturbance"
+    "Nightmares",
+    "Flashbacks", 
+    "Intrusive Thoughts",
+    "Avoidance", 
+    "Loss of Interest",
+    "Sleep Disturbance",
+    "Exaggerated Startle Response",
+    "Feeling Detached",
+    "Self Blame",
+    "Problems With Concentration",
+    "Angry Outbursts",
+    "Emotional Numbing",
+    "Excessive Alertness"
 ];
 
 const symptomToHebrew = {
-    "Angry Outbursts": "התקפי עצבים",
-    "Avoidance": "המנעות",
-    "Emotional Numbing": "תפיסה שלילית",
-    "Exaggerated Startle Response": "בהלה מופרזת",
-    "Excessive Alertness": "דריכות יתר",
-    "Feeling Detached": "תחושת ניתוק",
+    "Nightmares": "סיוטים",
     "Flashbacks": "פלשבקים",
     "Intrusive Thoughts": "מחשבות טורדניות",
+    "Avoidance": "המנעות",
     "Loss of Interest": "חסר עניין",
-    "Nightmares": "סיוטים",
-    "Problems With Concentration": "קשיי ריכוז",
+    "Sleep Disturbance": "בעיות שינה",
+    "Exaggerated Startle Response": "בהלה מופרזת",
+    "Feeling Detached": "תחושת ניתוק",
     "Self Blame": "אשמה",
-    "Sleep Disturbance": "בעיות שנה"
+    "Problems With Concentration": "קשיי ריכוז",
+    "Angry Outbursts": "התקפי עצבים",
+    "Emotional Numbing": "תפיסה שלילית",
+    "Excessive Alertness": "דריכות יתר"
 };
 
 const symptomVariants = {};
@@ -709,6 +718,7 @@ function updateAddedLabel() {
             labelSpan.textContent = labelText;
             labelSpan.style.fontSize = "1em";
             labelSpan.style.marginRight = "0.3em";
+            labelSpan.style.fontFamily = "David Libre";
 
             const img = document.createElement("img");
             img.src = `variants/${symptom}.svg`;

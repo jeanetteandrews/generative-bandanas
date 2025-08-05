@@ -3,6 +3,12 @@
   src: url('fonts/80-kb-Soft.otf');
 }
 
+.david-libre-regular {
+  font-family: "David Libre", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
 /* Reset and base styles */
 html, body {
   margin: 0;
@@ -302,12 +308,12 @@ input[type="range"]::-moz-range-track,
   width: 4rem;
   height: 4rem;
   cursor: pointer;
-  border: 0.2rem solid white;
-  outline: 0.08rem solid white;
+  border: 0.25rem solid white;
+  outline: 0.09rem solid white;
 }
 
 .color-option.selected {
-  border: 0.2rem solid white;
-  outline: 0.08rem solid black;
-  outline-offset: -0.08rem;
+  border: 0.25rem solid white;
+  outline: 0.09rem solid black;
+  outline-offset: -0.09rem;
 }
