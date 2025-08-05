@@ -17,23 +17,32 @@ async function pngToPdf(pngPath, pdfPath) {
   const pdfDoc = await PDFDocument.create();
   const pngImage = await pdfDoc.embedPng(pngImageBytes);
 
-  // Letter size in points
-  const pageWidth = 612;  // 8.5 in * 72
-  const pageHeight = 792; // 11 in * 72
+  // Page size: 4 x 6 inches in points
+  const pageWidth = 288;  // 4 inches
+  const pageHeight = 432; // 6 inches
   const page = pdfDoc.addPage([pageWidth, pageHeight]);
 
-  // Target print size: 4x6 inches = 288 x 432 pts
-  const imageWidth = 288;
-  const imageHeight = 432;
+  // Original image dimensions
+  const imgWidth = pngImage.width;
+  const imgHeight = pngImage.height;
 
-  const x = (pageWidth - imageWidth) / 2;
-  const y = (pageHeight - imageHeight) / 2;
+  // Calculate scale to fit image within page while preserving aspect ratio
+  const widthScale = pageWidth / imgWidth;
+  const heightScale = pageHeight / imgHeight;
+  const scale = Math.min(widthScale, heightScale);
+
+  const drawWidth = imgWidth * scale;
+  const drawHeight = imgHeight * scale;
+
+  // Center the image on the page
+  const x = (pageWidth - drawWidth) / 2;
+  const y = (pageHeight - drawHeight) / 2;
 
   page.drawImage(pngImage, {
     x,
     y,
-    width: imageWidth,
-    height: imageHeight,
+    width: drawWidth,
+    height: drawHeight,
   });
 
   const pdfBytes = await pdfDoc.save();
