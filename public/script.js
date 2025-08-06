@@ -1,4 +1,5 @@
 let p5Instance = null;
+let variantIcons = {};
 
 // Color state
 let currentColors = {
@@ -491,6 +492,7 @@ function initializeMainInterface() {
 
     initializeColorSelection();
     startP5Sketch();
+    initializeVariantCanvas();
 }
 
 
@@ -951,21 +953,42 @@ document.getElementById('restart-btn').addEventListener('click', () => {
     }
 });
 
+// REPLACE your existing print button event listener with this:
 document.getElementById("print-btn").addEventListener("click", async () => {
-    const canvas = document.querySelector("canvas");
-
-    if (!canvas) {
-        alert("No canvas found!");
+    const mainCanvas = document.querySelector("#sketch-holder canvas");
+    
+    if (!mainCanvas) {
+        alert("No main canvas found!");
         return;
     }
 
-    const imageData = canvas.toDataURL("image/png");
+    // Create the simple variant canvas
+    createSimpleVariantCanvas();
+    
+    // Wait for the variant canvas to render
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    const variantCanvas = document.querySelector("#variant-canvas-holder canvas");
+    
+    if (!variantCanvas) {
+        alert("Could not create variant canvas!");
+        return;
+    }
+
+    // Get both canvas data
+    const mainImageData = mainCanvas.toDataURL("image/png");
+    const variantImageData = variantCanvas.toDataURL("image/png");
+
+    console.log("Sending both canvases to server for printing");
 
     try {
         const response = await fetch("/print", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ image: imageData }),
+            body: JSON.stringify({ 
+                mainImage: mainImageData,
+                variantImage: variantImageData
+            }),
         });
 
         const text = await response.text();
@@ -1000,3 +1023,154 @@ document.getElementById("start-screen").addEventListener("click", () => {
   // Optional: center .fixed-ratio-wrapper again
   document.getElementById("main-interface").style.display = "flex";
 });
+
+// ADD THIS - Create variant canvas holder
+function initializeVariantCanvas() {
+    let variantHolder = document.getElementById('variant-canvas-holder');
+    if (!variantHolder) {
+        variantHolder = document.createElement('div');
+        variantHolder.id = 'variant-canvas-holder';
+        variantHolder.style.position = 'absolute';
+        variantHolder.style.left = '-9999px'; // Hide off-screen
+        variantHolder.style.top = '-9999px';
+        variantHolder.style.width = '3600px';
+        variantHolder.style.height = '300px';
+        document.body.appendChild(variantHolder);
+    }
+}
+
+let variantP5Instance = null;
+
+function createSimpleVariantCanvas() {
+    if (variantP5Instance) {
+        variantP5Instance.remove();
+    }
+    
+    variantP5Instance = new p5((p) => {
+        p.preload = function() {
+            // Preload SVGs from the variants folder
+            const activeSymptoms = [];
+            symptoms.forEach(symptom => {
+                if (symptomVariants[symptom] > 0) {
+                    activeSymptoms.push(symptom);
+                }
+            });
+            
+            // Load the variant SVGs
+            activeSymptoms.forEach(symptom => {
+                try {
+                    variantIcons[symptom] = p.loadImage(`variants/${symptom}.svg`);
+                    console.log(`Loading variant SVG for: ${symptom}`);
+                } catch (e) {
+                    console.log(`Failed to load variant SVG for: ${symptom}`);
+                }
+            });
+        };
+        
+        p.setup = function() {
+            let canvas = p.createCanvas(3600, 600);
+            canvas.parent('variant-canvas-holder');
+            p.noLoop();
+        };
+
+        p.draw = function() {
+            drawSimpleVariantList(p);
+        };
+    });
+}
+
+function drawSimpleVariantList(p) {
+    // Force white background
+    p.background(255, 255, 255);
+    
+    // Collect active variants
+    const symptomToChar = {
+        "Angry Outbursts": "E", "Avoidance": "C", "Emotional Numbing": "D",
+        "Exaggerated Startle Response": "E", "Excessive Alertness": "E", 
+        "Feeling Detached": "D", "Flashbacks": "B", "Intrusive Thoughts": "B",
+        "Loss of Interest": "D", "Nightmares": "B", "Problems With Concentration": "E",
+        "Self Blame": "D", "Sleep Disturbance": "E"
+    };
+    
+    const activeVariants = [];
+    symptoms.forEach(symptom => {
+        const variant = symptomVariants[symptom];
+        if (variant > 0) {
+            const char = symptomToChar[symptom] || "?";
+            activeVariants.push({ label: `${char}-00${variant}`, symptom: symptom });
+        }
+    });
+    
+    const canvas = p.canvas;
+    const ctx = canvas.getContext('2d');
+    ctx.font = '160px "David Libre", serif';
+    ctx.fillStyle = 'black';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    
+    if (activeVariants.length === 0) {
+        ctx.fillText('[]', 110, p.height / 2);
+        return;
+    }
+    
+    // Wrapping logic
+    const maxWidth = 3400; // Max width before wrapping
+    const startX = 110;
+    const lineHeight = 180; // Space between lines
+    let currentX = startX;
+    let currentY = 150; // Start higher to allow for multiple lines
+    
+    // Draw opening bracket
+    ctx.fillText('[', currentX, currentY);
+    currentX += ctx.measureText('[').width + 15;
+    
+    for (let i = 0; i < activeVariants.length; i++) {
+        const variant = activeVariants[i];
+        const itemWidth = ctx.measureText(variant.label + ', ').width + 90 + 35; // text + icon + spacing
+        
+        // Check if we need to wrap to next line
+        if (currentX + itemWidth > maxWidth && i > 0) {
+            currentY += lineHeight;
+            currentX = startX + 50; // Indent continuation lines
+        }
+        
+        // Draw variant label
+        ctx.fillText(variant.label, currentX, currentY);
+        currentX += ctx.measureText(variant.label).width + 15;
+        
+        // Draw icon (same as before)
+        try {
+            if (variantIcons[variant.symptom] && variantIcons[variant.symptom].width > 0) {
+                const iconImg = variantIcons[variant.symptom];
+                const iconSize = 90;
+                const iconY = currentY - iconSize/2;
+                
+                p.tint(0, 0, 0);
+                p.image(iconImg, currentX, iconY, iconSize, iconSize);
+                p.noTint();
+                currentX += iconSize + 20;
+            } else {
+                p.fill(0);
+                p.noStroke();
+                p.circle(currentX + 40, currentY, 70);
+                currentX += 80;
+            }
+        } catch (e) {
+            p.fill(0);
+            p.noStroke();
+            p.circle(currentX + 40, currentY, 70);
+            currentX += 80;
+        }
+        
+        ctx.fillStyle = 'black';
+        
+        // Add comma if not the last item
+        if (i < activeVariants.length - 1) {
+            ctx.fillText(', ', currentX, currentY);
+            currentX += ctx.measureText(', ').width + 15;
+        }
+    }
+    
+    // Draw closing bracket
+    ctx.fillText(']', currentX, currentY);
+}
