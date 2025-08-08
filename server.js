@@ -57,15 +57,15 @@ async function createPdfFromTwoCanvases(mainImagePath, variantImagePath, pdfPath
   
   // Scale variant canvas to fit below main canvas
   const availableVariantHeight = mainY - margin - 10; // Space below main canvas minus bottom margin
-  const variantWidthScale = (contentWidth * 0.9) / variantImgWidth; // Use 90% of content width
+  const variantWidthScale = (contentWidth * 0.3) / variantImgWidth; // Use 90% of content width
   const variantHeightScale = availableVariantHeight / variantImgHeight;
   const variantScale = Math.min(variantWidthScale, variantHeightScale);
   
   const variantDrawWidth = variantImgWidth * variantScale;
   const variantDrawHeight = variantImgHeight * variantScale;
   
-  // Position variant canvas below main canvas, aligned to left edge of main canvas
-  const variantX = mainX - 5; // Align with left edge of main canvas, nudge 5 points
+  const variantX = mainX + mainDrawWidth - variantDrawWidth; // Align with right edge of main canvas
+//   const variantX = mainX;
   const variantY = mainY - variantDrawHeight - 50; // 10 points below main canvas
   
   page.drawImage(variantImage, {
@@ -132,8 +132,6 @@ function startServer() {
     const outputMainPngPath = path.join(__dirname, "output-main.png");
     const outputVariantPngPath = path.join(__dirname, "output-variant.png");
     const outputPdfPath = path.join(__dirname, "output.pdf");
-    
-    console.log("Received print request with two canvases");
     
     try {
       // Save both PNG image files
