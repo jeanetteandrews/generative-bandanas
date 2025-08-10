@@ -10,8 +10,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-  "express": "^5.1.0",
-  "pdf-lib": "^1.17.1",
-  "pdf-to-printer": "^5.0.0"
+    "express": "^5.1.0",
+    "pdf-lib": "^1.17.1",
+    "pdf-to-printer": "5.0.0"
   }
 }
